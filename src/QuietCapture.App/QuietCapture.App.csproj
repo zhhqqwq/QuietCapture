@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>QuietCapture</AssemblyName>
+    <RootNamespace>QuietCapture.App</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\QuietCapture.Core\QuietCapture.Core.csproj" />
+    <ProjectReference Include="..\QuietCapture.Infrastructure.Windows\QuietCapture.Infrastructure.Windows.csproj" />
+    <ProjectReference Include="..\QuietCapture.UI.Wpf\QuietCapture.UI.Wpf.csproj" />
+  </ItemGroup>
+</Project>

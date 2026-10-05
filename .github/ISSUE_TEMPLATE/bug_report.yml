@@ -1,0 +1,58 @@
+name: Bug report
+description: Report a reproducible QuietCapture problem
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping make QuietCapture more reliable. Remove private information from logs, recordings, and screenshots before attaching them.
+  - type: input
+    id: version
+    attributes:
+      label: QuietCapture version or commit
+      placeholder: e.g. commit SHA or release version
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version and build
+      placeholder: e.g. Windows 11 24H2, build ...
+    validations:
+      required: true
+  - type: dropdown
+    id: capture
+    attributes:
+      label: Capture type
+      options: [Area, Window, Monitor, Not recording related]
+    validations:
+      required: true
+  - type: input
+    id: audio
+    attributes:
+      label: Audio configuration
+      placeholder: e.g. system audio on, microphone off
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Give the shortest sequence that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or other evidence
+      description: Paste relevant text or attach safe diagnostic files.

@@ -1,0 +1,29 @@
+name: Feature request
+description: Propose a user workflow or capability
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem cannot be solved well with the current workflow?
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Expected workflow
+      description: Describe the smallest interaction that would solve the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional. Include workarounds or simpler approaches you considered.
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope impact
+      description: Optional. Explain whether this adds UI, settings, platform dependencies, file formats, or packaging requirements.

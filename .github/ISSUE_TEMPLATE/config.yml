@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security reports
+    url: https://github.com/zhhqqwq/QuietCapture/security
+    about: Use a private security channel when available; do not publish exploit details in an issue.
