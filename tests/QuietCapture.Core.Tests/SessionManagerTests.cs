@@ -12,12 +12,8 @@ public sealed class SessionManagerTests
     {
         var fileSystem =
             new FakeFileSystem();
-        var planner =
-            new OutputPlanner(fileSystem);
         var manager =
-            new SessionManager(
-                fileSystem,
-                planner);
+            CreateManager(fileSystem);
 
         DateTimeOffset createdAt =
             new(
@@ -123,10 +119,7 @@ public sealed class SessionManagerTests
             };
 
         var manager =
-            new SessionManager(
-                fileSystem,
-                new OutputPlanner(
-                    fileSystem));
+            CreateManager(fileSystem);
 
         string outputDirectory =
             CreateOutputDirectory(
@@ -183,10 +176,7 @@ public sealed class SessionManagerTests
                 : null;
 
         var manager =
-            new SessionManager(
-                fileSystem,
-                new OutputPlanner(
-                    fileSystem));
+            CreateManager(fileSystem);
 
         Assert.Throws<IOException>(
             () =>
@@ -235,10 +225,7 @@ public sealed class SessionManagerTests
         var fileSystem =
             new FakeFileSystem();
         var manager =
-            new SessionManager(
-                fileSystem,
-                new OutputPlanner(
-                    fileSystem));
+            CreateManager(fileSystem);
 
         SessionMetadata session =
             manager.CreateSession(
@@ -280,6 +267,30 @@ public sealed class SessionManagerTests
         Assert.Equal(
             "capture-device-17",
             document.Options.MicrophoneDeviceId);
+    }
+
+    private static SessionManager CreateManager(
+        FakeFileSystem fileSystem)
+    {
+        string indexPath =
+            Path.Combine(
+                Path.GetTempPath(),
+                "QuietCapture",
+                "SessionManagerTests",
+                Guid.NewGuid().ToString("N"),
+                "recovery-index.json");
+
+        var persistence =
+            new SessionPersistenceService(
+                new SessionStore(fileSystem),
+                new RecoveryIndexStore(
+                    fileSystem,
+                    indexPath));
+
+        return new SessionManager(
+            fileSystem,
+            new OutputPlanner(fileSystem),
+            persistence);
     }
 
     private static CaptureTarget CreateTarget()

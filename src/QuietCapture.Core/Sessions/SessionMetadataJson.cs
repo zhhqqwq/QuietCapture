@@ -15,9 +15,20 @@ public static class SessionMetadataJson
     public static string Serialize(
         SessionMetadata session)
     {
-        return JsonSerializer.Serialize(
+        ArgumentNullException.ThrowIfNull(session);
+
+        return Serialize(
             SessionMetadataDocument.FromDomain(
-                session),
+                session));
+    }
+
+    public static string Serialize(
+        SessionMetadataDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        return JsonSerializer.Serialize(
+            document,
             Options);
     }
 

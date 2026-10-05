@@ -159,3 +159,41 @@ Still deferred:
 - recovery-index lifecycle writes from application orchestration;
 - cleanup of completed Session working directories;
 - recording backend integration.
+
+
+## Phase 1 Session Persistence lifecycle
+
+Session lifecycle persistence now separates per-Session truth from the recovery discovery index.
+
+### Ordering
+
+Created Session registration is:
+
+1. atomically write `session.json`;
+2. atomically add the Session to `recovery-index.json`.
+
+A crash between those writes leaves an unindexed Session directory, which direct recovery directory scanning can still discover.
+
+State transitions are persisted as a proposed next-state document before the in-memory `SessionMetadata` advances. If the metadata write fails, the domain object remains in its previous state.
+
+For safe-clean terminal states (`Completed` and `FailedToStart`), persistence order is:
+
+1. atomically write the terminal `session.json`;
+2. advance the in-memory Session;
+3. atomically remove the recovery-index entry.
+
+A crash or index-write failure after step 1 can leave a stale index entry, but recovery classification uses the terminal `session.json` as authoritative and reports `NoRecoveryRequired`.
+
+Recovery-relevant terminal states (`StopFailed`, `Interrupted`, and `Orphaned`) remain in the recovery index.
+
+### Stores
+
+`SessionStore` owns versioned `session.json` persistence.
+
+`RecoveryIndexStore` owns serialized, in-process synchronized read/modify/write of `recovery-index.json`.
+
+`SessionPersistenceService` coordinates lifecycle ordering between those stores and the mutable domain Session.
+
+`SessionManager` now registers a Created Session through `SessionPersistenceService`. If index registration fails after `session.json` is durable, the working directory and zero-byte final-path reservation are preserved for recovery rather than cleaned as if creation never happened.
+
+Still deferred: application composition of the recovery-index path, multi-process coordination, final-media publication, and recording-backend lifecycle orchestration.

@@ -8,10 +8,13 @@ public sealed class SessionManager
 {
     private readonly IFileSystem _fileSystem;
     private readonly OutputPlanner _outputPlanner;
+    private readonly SessionPersistenceService
+        _persistenceService;
 
     public SessionManager(
         IFileSystem fileSystem,
-        OutputPlanner outputPlanner)
+        OutputPlanner outputPlanner,
+        SessionPersistenceService persistenceService)
     {
         _fileSystem =
             fileSystem ??
@@ -22,6 +25,11 @@ public sealed class SessionManager
             outputPlanner ??
             throw new ArgumentNullException(
                 nameof(outputPlanner));
+
+        _persistenceService =
+            persistenceService ??
+            throw new ArgumentNullException(
+                nameof(persistenceService));
     }
 
     public SessionMetadata CreateSession(
@@ -61,13 +69,9 @@ public sealed class SessionManager
                     plan.FinalMediaPath,
                     createdAt);
 
-            string json =
-                SessionMetadataJson.Serialize(
+            _persistenceService
+                .RegisterCreatedSession(
                     session);
-
-            _fileSystem.WriteAllTextAtomically(
-                plan.SessionMetadataPath,
-                json);
 
             return session;
         }
@@ -92,14 +96,22 @@ public sealed class SessionManager
         OutputPlan plan =
             reservation.Plan;
 
-        bool preserveWorkingDirectory =
+        bool metadataExists =
             _fileSystem.FileExists(
-                plan.TempMediaPath) &&
-            _fileSystem.GetFileLength(
-                plan.TempMediaPath) > 0;
+                plan.SessionMetadataPath);
 
-        _outputPlanner.ReleaseIfUnused(
-            reservation);
+        bool preserveWorkingDirectory =
+            metadataExists ||
+            (_fileSystem.FileExists(
+                 plan.TempMediaPath) &&
+             _fileSystem.GetFileLength(
+                 plan.TempMediaPath) > 0);
+
+        if (!metadataExists)
+        {
+            _outputPlanner.ReleaseIfUnused(
+                reservation);
+        }
 
         if (!preserveWorkingDirectory)
         {

@@ -72,6 +72,50 @@ public sealed record SessionMetadataDocument
                     session.Options)
         };
     }
+
+    internal static SessionMetadataDocument FromTransition(
+        SessionMetadata session,
+        SessionStatus nextStatus,
+        DateTimeOffset occurredAt,
+        StopReason? stopReason)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        SessionLifecycle.EnsureTransition(
+            session.Status,
+            nextStatus);
+
+        SessionMetadataDocument current =
+            FromDomain(session);
+
+        DateTimeOffset? startedAt =
+            current.StartedAt;
+
+        if (nextStatus ==
+                SessionStatus.Recording &&
+            startedAt is null)
+        {
+            startedAt = occurredAt;
+        }
+
+        DateTimeOffset? finishedAt =
+            SessionLifecycle.IsTerminal(
+                nextStatus)
+                ? occurredAt
+                : current.FinishedAt;
+
+        string? persistedStopReason =
+            current.StopReason ??
+            stopReason?.ToString();
+
+        return current with
+        {
+            Status = nextStatus.ToString(),
+            StartedAt = startedAt,
+            FinishedAt = finishedAt,
+            StopReason = persistedStopReason
+        };
+    }
 }
 
 public sealed record CaptureTargetDocument
