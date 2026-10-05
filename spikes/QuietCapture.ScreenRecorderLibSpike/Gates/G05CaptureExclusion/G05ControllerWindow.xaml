@@ -1,0 +1,160 @@
+<Window x:Class="QuietCapture.ScreenRecorderLibSpike.Gates.G05CaptureExclusion.G05ControllerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="QuietCapture G0-5 Capture Exclusion"
+        Width="900"
+        Height="720"
+        MinWidth="820"
+        MinHeight="650"
+        WindowStartupLocation="CenterScreen">
+  <Grid Margin="20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0">
+      <TextBlock FontSize="22"
+                 FontWeight="SemiBold"
+                 Text="G0-5 — Capture Exclusion" />
+      <TextBlock Margin="0,6,0,0"
+                 TextWrapping="Wrap"
+                 Text="The harness prepares real StatusWindow and RecordingBorderWindow HWNDs before Show, applies WDA_EXCLUDEFROMCAPTURE or WDA_NONE, starts recording, waits for RecorderStatus.Recording, then shows the overlays." />
+    </StackPanel>
+
+    <Grid Grid.Row="1" Margin="0,18,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="220" />
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <TextBlock VerticalAlignment="Center" Text="Capture mode" />
+      <ComboBox x:Name="CaptureModeComboBox"
+                Grid.Column="1"
+                SelectedIndex="0">
+        <ComboBoxItem Content="Area" />
+        <ComboBoxItem Content="Monitor" />
+        <ComboBoxItem Content="Window" />
+      </ComboBox>
+
+      <TextBlock Grid.Column="2"
+                 Margin="24,0,0,0"
+                 VerticalAlignment="Center"
+                 Text="Exclusion" />
+      <CheckBox x:Name="ExclusionCheckBox"
+                Grid.Column="3"
+                VerticalAlignment="Center"
+                IsChecked="True"
+                Content="Apply WDA_EXCLUDEFROMCAPTURE" />
+    </Grid>
+
+    <Grid Grid.Row="2" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Text="Primary display" />
+      <TextBox x:Name="DisplayTextBox"
+               Grid.Column="1"
+               IsReadOnly="True" />
+    </Grid>
+
+    <Grid Grid.Row="3" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="80" />
+        <ColumnDefinition Width="32" />
+        <ColumnDefinition Width="80" />
+        <ColumnDefinition Width="60" />
+        <ColumnDefinition Width="100" />
+        <ColumnDefinition Width="64" />
+        <ColumnDefinition Width="100" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <TextBlock VerticalAlignment="Center" Text="Area SourceRect" />
+      <TextBox x:Name="AreaXTextBox" Grid.Column="1" Text="0" />
+      <TextBlock Grid.Column="2"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center"
+                 Text="Y" />
+      <TextBox x:Name="AreaYTextBox" Grid.Column="3" Text="0" />
+      <TextBlock Grid.Column="4"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center"
+                 Text="Width" />
+      <TextBox x:Name="AreaWidthTextBox" Grid.Column="5" Text="1280" />
+      <TextBlock Grid.Column="6"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center"
+                 Text="Height" />
+      <TextBox x:Name="AreaHeightTextBox" Grid.Column="7" Text="720" />
+    </Grid>
+
+    <Grid Grid.Row="4" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="220" />
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <TextBlock VerticalAlignment="Center" Text="Record seconds" />
+      <TextBox x:Name="RunSecondsTextBox"
+               Grid.Column="1"
+               Text="8" />
+      <TextBlock Grid.Column="2"
+                 Margin="24,0,0,0"
+                 VerticalAlignment="Center"
+                 Text="Overlay shape" />
+      <TextBlock Grid.Column="3"
+                 VerticalAlignment="Center"
+                 Text="Status + Border / transparent / topmost / click-through" />
+    </Grid>
+
+    <Grid Grid.Row="5" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Text="Evidence root" />
+      <TextBox x:Name="EvidenceRootTextBox"
+               Grid.Column="1"
+               IsReadOnly="True" />
+    </Grid>
+
+    <StackPanel Grid.Row="6"
+                Margin="0,18,0,16"
+                Orientation="Horizontal">
+      <Button x:Name="RunButton"
+              Padding="20,8"
+              Content="Run Capture Test"
+              Click="RunButton_Click" />
+      <Button Margin="10,0,0,0"
+              Padding="16,8"
+              Content="Refresh Primary Display"
+              Click="RefreshDisplayButton_Click" />
+      <TextBlock x:Name="StateTextBlock"
+                 Margin="20,0,0,0"
+                 VerticalAlignment="Center"
+                 FontWeight="SemiBold"
+                 Text="Idle" />
+    </StackPanel>
+
+    <TextBox x:Name="LogTextBox"
+             Grid.Row="7"
+             IsReadOnly="True"
+             AcceptsReturn="True"
+             VerticalScrollBarVisibility="Auto"
+             HorizontalScrollBarVisibility="Auto"
+             TextWrapping="NoWrap" />
+  </Grid>
+</Window>

@@ -1,0 +1,40 @@
+<Window x:Class="QuietCapture.ScreenRecorderLibSpike.Gates.G05CaptureExclusion.G05CaptureTargetWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="QuietCapture G0-5 Window Capture Target"
+        Width="900"
+        Height="560"
+        WindowStartupLocation="Manual"
+        Background="#FF182438">
+  <Grid Margin="32">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <TextBlock Foreground="White"
+               FontSize="28"
+               FontWeight="Bold"
+               Text="G0-5 WINDOW CAPTURE TARGET" />
+
+    <Border Grid.Row="1"
+            Margin="0,24"
+            BorderBrush="#FF4CC9F0"
+            BorderThickness="4"
+            CornerRadius="16">
+      <Grid>
+        <TextBlock HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Foreground="White"
+                   FontSize="22"
+                   Text="This window must remain visible in Window-mode recordings." />
+      </Grid>
+    </Border>
+
+    <TextBlock x:Name="ClockTextBlock"
+               Grid.Row="2"
+               Foreground="#FF8CE7FF"
+               FontSize="20" />
+  </Grid>
+</Window>

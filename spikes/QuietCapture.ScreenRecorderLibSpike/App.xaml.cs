@@ -2,6 +2,7 @@ using System.Windows;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G02SystemAudio;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G03SystemAudioMicrophone;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G04MediaCrashRecovery;
+using QuietCapture.ScreenRecorderLibSpike.Gates.G05CaptureExclusion;
 
 namespace QuietCapture.ScreenRecorderLibSpike;
 
@@ -27,6 +28,7 @@ public partial class App : Application
             "g0-2" => new G02SystemAudioWindow(),
             "g0-3" => new G03SystemAudioMicrophoneWindow(),
             "g0-4" => new G04ControllerWindow(),
+            "g0-5" => new G05ControllerWindow(),
             _ => new MainWindow()
         };
 

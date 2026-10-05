@@ -99,16 +99,29 @@ Do not freeze fragmented-MP4 policy, fixed-framerate policy, remux/finalization 
 ## G0-5 — Capture exclusion
 **Status:** NOT RUN
 
-Validate real StatusWindow and RecordingBorder window shapes with WDA_EXCLUDEFROMCAPTURE across required area, window, and monitor capture paths.
+The G0-5 harness uses real top-level WPF StatusWindow and RecordingBorderWindow instances with `WindowStyle=None`, `AllowsTransparency=True`, `Topmost=True`, no taskbar entry, and native click-through/no-activate/tool-window extended styles.
+
+For each run the harness calls `WindowInteropHelper.EnsureHandle()`, applies either `WDA_EXCLUDEFROMCAPTURE` or the `WDA_NONE` control value, verifies the value with `GetWindowDisplayAffinity`, starts ScreenRecorderLib, waits for `RecorderStatus.Recording`, and only then shows both overlay windows. After `Show()`, affinity is read again without reapplying it.
 
 ### Evidence
-TBD
+
+Harness prepared for three routes:
+
+- Area — primary-display `DisplayRecordingSource` with explicit `SourceRect`;
+- Monitor — primary-display `DisplayRecordingSource`;
+- Window — a deterministic non-excluded in-process target captured with `WindowRecordingSource` / Windows Graphics Capture.
+
+The E1–E6 matrix pairs `WDA_NONE` control runs with `WDA_EXCLUDEFROMCAPTURE` runs. Each run produces an MP4, ScreenRecorderLib log, and JSON manifest containing both overlay HWNDs, requested/verified affinity before Show, affinity re-read after Show, native extended styles, recorder lifecycle timestamps, capture target identity, and output size/existence. An optional external reference screenshot path is reserved in the manifest.
+
+Runtime evidence is pending Windows execution using `Gates/G05CaptureExclusion/README.md`.
 
 ### Result
-TBD
+
+TBD after runtime validation.
 
 ### Architecture consequence
-TBD
+
+Do not freeze the final overlay implementation until G0-5 proves the actual StatusWindow and RecordingBorderWindow shapes stay visible to the user but absent from every production capture route that could otherwise include them. Control runs must separate display-affinity behavior from capture APIs that intrinsically ignore overlapping windows.
 
 ## G0-6 — Stability and Stop latency
 **Status:** NOT RUN
@@ -154,3 +167,6 @@ TBD
 - Which fragmented/fixed-framerate combination gives acceptable normal MP4 compatibility?
 - Which configuration leaves the most useful raw media after abrupt process termination?
 - Is a post-normal-stop remux/finalize step required for editor compatibility?
+- Does WDA_EXCLUDEFROMCAPTURE remain applied after real transparent/topmost WPF overlays are shown?
+- Which Area/Monitor capture path actually honors display affinity for these overlay HWNDs?
+- Does the Window/WGC route exclude unrelated overlapping windows even in the WDA_NONE control run?
