@@ -24,7 +24,13 @@ public interface IFileSystem
 
     bool DeleteFileIfEmpty(string path);
 
+    void DeleteFile(string path);
+
     void DeleteDirectoryIfEmpty(string path);
+
+    void MoveFileReplacingEmptyReservation(
+        string sourcePath,
+        string destinationPath);
 
     void WriteAllTextAtomically(
         string path,

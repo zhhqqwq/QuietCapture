@@ -13,11 +13,15 @@ internal sealed class FakeFileSystem : IFileSystem
     private readonly ConcurrentDictionary<string, byte> _directories =
         new(StringComparer.OrdinalIgnoreCase);
 
+    private readonly object _moveGate = new();
+
     public Func<string, StorageVolumeInfo>? VolumeResolver { get; set; }
 
     public Action<string>? BeforeAtomicWrite { get; set; }
 
     public Func<string, Exception?>? AtomicWriteFailureFactory { get; set; }
+
+    public Func<string, string, Exception?>? MoveFileFailureFactory { get; set; }
 
     public IReadOnlyCollection<string> FilePaths =>
         _files.Keys.ToArray();
@@ -161,6 +165,13 @@ internal sealed class FakeFileSystem : IFileSystem
         return false;
     }
 
+    public void DeleteFile(string path)
+    {
+        _files.TryRemove(
+            Normalize(path),
+            out _);
+    }
+
     public void DeleteDirectoryIfEmpty(string path)
     {
         string normalized =
@@ -192,6 +203,60 @@ internal sealed class FakeFileSystem : IFileSystem
         {
             _directories.TryRemove(
                 normalized,
+                out _);
+        }
+    }
+
+    public void MoveFileReplacingEmptyReservation(
+        string sourcePath,
+        string destinationPath)
+    {
+        string source =
+            Normalize(sourcePath);
+        string destination =
+            Normalize(destinationPath);
+
+        lock (_moveGate)
+        {
+            Exception? failure =
+                MoveFileFailureFactory?.Invoke(
+                    source,
+                    destination);
+
+            if (failure is not null)
+            {
+                throw failure;
+            }
+
+            if (!_files.TryGetValue(
+                    source,
+                    out byte[]? sourceBytes))
+            {
+                throw new FileNotFoundException(
+                    "Fake source file not found.",
+                    source);
+            }
+
+            if (!_files.TryGetValue(
+                    destination,
+                    out byte[]? destinationBytes))
+            {
+                throw new FileNotFoundException(
+                    "Fake destination reservation not found.",
+                    destination);
+            }
+
+            if (destinationBytes.Length != 0)
+            {
+                throw new IOException(
+                    "Fake destination reservation is not empty.");
+            }
+
+            _files[destination] =
+                sourceBytes;
+
+            _files.TryRemove(
+                source,
                 out _);
         }
     }

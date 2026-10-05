@@ -38,6 +38,25 @@ public sealed class RecoveryIndexStore
         }
     }
 
+    public bool Contains(
+        RecoveryIndexEntry entry)
+    {
+        ArgumentNullException.ThrowIfNull(entry);
+
+        lock (_gate)
+        {
+            RecoveryIndex current =
+                LoadUnsafe();
+
+            return current.Entries.Any(existing =>
+                existing.SessionId ==
+                    entry.SessionId &&
+                PathsEqual(
+                    existing.WorkingDirectory,
+                    entry.WorkingDirectory));
+        }
+    }
+
     public void Add(
         RecoveryIndexEntry entry)
     {

@@ -197,3 +197,38 @@ Recovery-relevant terminal states (`StopFailed`, `Interrupted`, and `Orphaned`) 
 `SessionManager` now registers a Created Session through `SessionPersistenceService`. If index registration fails after `session.json` is durable, the working directory and zero-byte final-path reservation are preserved for recovery rather than cleaned as if creation never happened.
 
 Still deferred: application composition of the recovery-index path, multi-process coordination, final-media publication, and recording-backend lifecycle orchestration.
+
+
+## Phase 1 Media Publication + Session Cleanup foundation
+
+Successful media publication is now a backend-independent Core operation performed while a Session is `Finalizing`.
+
+`MediaPublisher` requires all of the following before it moves media:
+
+- non-empty `recording.partial.mp4`;
+- an existing zero-byte final-path reservation;
+- source and final paths on the same resolved volume.
+
+If any prerequisite fails, the partial file is left in place. A filesystem move failure is reported as a failed publication and must preserve the partial media.
+
+The filesystem contract now includes `MoveFileReplacingEmptyReservation`. The Windows implementation revalidates the zero-byte reservation while holding a handle that permits delete/rename but denies new writers, then uses same-volume `MoveFileEx(REPLACE_EXISTING | WRITE_THROUGH)`. Cross-volume copy fallback is not enabled.
+
+`SessionCleanupPolicy` only cleans safe terminal Sessions after recovery-index removal is complete:
+
+- `Completed` requires the partial file to be absent and the final media to exist with non-zero length;
+- `FailedToStart` may release only empty partial/final placeholders;
+- `StopFailed`, `Interrupted`, and `Orphaned` are never automatically cleaned.
+
+Cleanup deletes `session.json` and then attempts non-recursive working-directory deletion. Unknown files keep the directory present.
+
+The intended successful finalization order is therefore:
+
+1. Session is `Finalizing`;
+2. publish partial media into the reserved final path;
+3. atomically persist `Completed`;
+4. remove the recovery-index entry;
+5. clean Session metadata/empty working directory.
+
+If recovery-index removal fails after `Completed` is durable, cleanup refuses to run until the stale index entry is resolved.
+
+Still deferred: backend-specific finalization/remux before publication, cleanup scheduling/orchestration, and release-time media compatibility policy.

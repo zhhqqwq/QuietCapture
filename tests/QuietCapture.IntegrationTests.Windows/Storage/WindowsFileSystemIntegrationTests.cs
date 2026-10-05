@@ -307,6 +307,148 @@ public sealed class WindowsFileSystemIntegrationTests
                 nonEmptyDirectory));
     }
 
+    [Fact]
+    public void MoveFileReplacingEmptyReservation_PublishesMedia()
+    {
+        using var scope =
+            TestDirectoryScope.Create();
+        var fileSystem =
+            new WindowsFileSystem();
+
+        string source =
+            Path.Combine(
+                scope.Path,
+                "recording.partial.mp4");
+        string destination =
+            Path.Combine(
+                scope.Path,
+                "final.mp4");
+
+        File.WriteAllText(
+            source,
+            "video-data");
+
+        Assert.True(
+            fileSystem.TryReserveFile(
+                destination));
+
+        fileSystem.MoveFileReplacingEmptyReservation(
+            source,
+            destination);
+
+        Assert.False(
+            File.Exists(source));
+        Assert.Equal(
+            "video-data",
+            File.ReadAllText(destination));
+    }
+
+    [Fact]
+    public void MoveFileReplacingEmptyReservation_RejectsNonEmptyDestination()
+    {
+        using var scope =
+            TestDirectoryScope.Create();
+        var fileSystem =
+            new WindowsFileSystem();
+
+        string source =
+            Path.Combine(
+                scope.Path,
+                "recording.partial.mp4");
+        string destination =
+            Path.Combine(
+                scope.Path,
+                "final.mp4");
+
+        File.WriteAllText(
+            source,
+            "partial-media");
+        File.WriteAllText(
+            destination,
+            "existing-final");
+
+        Assert.Throws<IOException>(
+            () =>
+                fileSystem.MoveFileReplacingEmptyReservation(
+                    source,
+                    destination));
+
+        Assert.Equal(
+            "partial-media",
+            File.ReadAllText(source));
+        Assert.Equal(
+            "existing-final",
+            File.ReadAllText(destination));
+    }
+
+    [Fact]
+    public void MoveFileFailure_PreservesSourceAndEmptyReservation()
+    {
+        using var scope =
+            TestDirectoryScope.Create();
+        var fileSystem =
+            new WindowsFileSystem();
+
+        string source =
+            Path.Combine(
+                scope.Path,
+                "recording.partial.mp4");
+        string destination =
+            Path.Combine(
+                scope.Path,
+                "final.mp4");
+
+        File.WriteAllText(
+            source,
+            "partial-media");
+
+        Assert.True(
+            fileSystem.TryReserveFile(
+                destination));
+
+        using var sourceLock =
+            new FileStream(
+                source,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read);
+
+        Assert.Throws<IOException>(
+            () =>
+                fileSystem.MoveFileReplacingEmptyReservation(
+                    source,
+                    destination));
+
+        Assert.True(
+            File.Exists(source));
+        Assert.Equal(
+            0,
+            new FileInfo(destination).Length);
+    }
+
+    [Fact]
+    public void DeleteFile_RemovesMetadataFile()
+    {
+        using var scope =
+            TestDirectoryScope.Create();
+        var fileSystem =
+            new WindowsFileSystem();
+
+        string path =
+            Path.Combine(
+                scope.Path,
+                "session.json");
+
+        File.WriteAllText(
+            path,
+            "{}");
+
+        fileSystem.DeleteFile(path);
+
+        Assert.False(
+            File.Exists(path));
+    }
+
     private sealed class TestDirectoryScope : IDisposable
     {
         private TestDirectoryScope(

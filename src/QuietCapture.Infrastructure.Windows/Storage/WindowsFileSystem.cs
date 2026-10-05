@@ -8,17 +8,20 @@ public sealed class WindowsFileSystem : IFileSystem
 {
     private readonly VolumeInfoResolver _volumeInfoResolver;
     private readonly AtomicTextFileWriter _atomicTextFileWriter;
+    private readonly AtomicMediaFileMover _atomicMediaFileMover;
 
     public WindowsFileSystem()
         : this(
             new VolumeInfoResolver(),
-            new AtomicTextFileWriter())
+            new AtomicTextFileWriter(),
+            new AtomicMediaFileMover())
     {
     }
 
     public WindowsFileSystem(
         VolumeInfoResolver volumeInfoResolver,
-        AtomicTextFileWriter atomicTextFileWriter)
+        AtomicTextFileWriter atomicTextFileWriter,
+        AtomicMediaFileMover atomicMediaFileMover)
     {
         _volumeInfoResolver =
             volumeInfoResolver ??
@@ -29,6 +32,11 @@ public sealed class WindowsFileSystem : IFileSystem
             atomicTextFileWriter ??
             throw new ArgumentNullException(
                 nameof(atomicTextFileWriter));
+
+        _atomicMediaFileMover =
+            atomicMediaFileMover ??
+            throw new ArgumentNullException(
+                nameof(atomicMediaFileMover));
     }
 
     public StorageVolumeInfo GetStorageVolumeInfo(
@@ -132,6 +140,12 @@ public sealed class WindowsFileSystem : IFileSystem
         }
     }
 
+    public void DeleteFile(
+        string path)
+    {
+        File.Delete(path);
+    }
+
     public void DeleteDirectoryIfEmpty(
         string path)
     {
@@ -147,6 +161,33 @@ public sealed class WindowsFileSystem : IFileSystem
         catch (IOException)
         {
         }
+    }
+
+    public void MoveFileReplacingEmptyReservation(
+        string sourcePath,
+        string destinationPath)
+    {
+        StorageVolumeInfo sourceVolume =
+            _volumeInfoResolver.Resolve(
+                sourcePath);
+
+        StorageVolumeInfo destinationVolume =
+            _volumeInfoResolver.Resolve(
+                destinationPath);
+
+        if (!string.Equals(
+                sourceVolume.VolumeId,
+                destinationVolume.VolumeId,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            throw new IOException(
+                "Source media and final reservation are not on the same volume.");
+        }
+
+        _atomicMediaFileMover
+            .MoveReplacingEmptyReservation(
+                sourcePath,
+                destinationPath);
     }
 
     public void WriteAllTextAtomically(
