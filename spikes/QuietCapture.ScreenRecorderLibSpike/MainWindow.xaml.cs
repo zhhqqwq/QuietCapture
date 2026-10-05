@@ -2,6 +2,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using Microsoft.Win32;
+using QuietCapture.ScreenRecorderLibSpike.Gates.G01AreaCapture;
 using ScreenRecorderLib;
 
 namespace QuietCapture.ScreenRecorderLibSpike;
@@ -9,6 +10,8 @@ namespace QuietCapture.ScreenRecorderLibSpike;
 public partial class MainWindow : Window
 {
     private Recorder? _recorder;
+    private G01RunReport? _runReport;
+    private string? _runReportPath;
     private List<DisplayChoice> _displayChoices = new();
 
     public MainWindow()
@@ -92,6 +95,22 @@ public partial class MainWindow : Window
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
 
         bool includeCursor = IncludeCursorCheckBox.IsChecked == true;
+        string recorderLogPath = Path.ChangeExtension(outputPath, ".log");
+        _runReportPath = Path.ChangeExtension(outputPath, ".g0-1.json");
+        _runReport = new G01RunReport
+        {
+            OutputPath = outputPath,
+            RecorderLogPath = recorderLogPath,
+            DisplayDeviceName = choice.Display.DeviceName,
+            DisplayFriendlyName = choice.Display.FriendlyName ?? string.Empty,
+            X = x,
+            Y = y,
+            Width = width,
+            Height = height,
+            IncludeCursor = includeCursor
+        };
+        _runReport.AddEvent("StartRequested");
+        TrySaveRunReport();
         var source = new DisplayRecordingSource(choice.Display.DeviceName)
         {
             SourceRect = new ScreenRect(x, y, width, height),
@@ -130,7 +149,7 @@ public partial class MainWindow : Window
             LogOptions = new LogOptions
             {
                 IsLogEnabled = true,
-                LogFilePath = Path.ChangeExtension(outputPath, ".log"),
+                LogFilePath = recorderLogPath,
                 LogSeverityLevel = ScreenRecorderLib.LogLevel.Debug
             }
         };
@@ -151,6 +170,15 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             Log($"Start failed: {ex}");
+            if (_runReport is not null)
+            {
+                _runReport.Status = "StartFailed";
+                _runReport.Error = ex.ToString();
+                _runReport.FinishedAtUtc = DateTimeOffset.UtcNow;
+                _runReport.AddEvent("StartFailed", ex.Message);
+                TrySaveRunReport();
+            }
+
             SetIdle();
             DisposeRecorder();
         }
@@ -169,11 +197,27 @@ public partial class MainWindow : Window
         try
         {
             Log("Stop requested.");
+            if (_runReport is not null)
+            {
+                _runReport.StopRequestedAtUtc = DateTimeOffset.UtcNow;
+                _runReport.AddEvent("StopRequested");
+                TrySaveRunReport();
+            }
+
             _recorder.Stop();
         }
         catch (Exception ex)
         {
             Log($"Stop failed: {ex}");
+            if (_runReport is not null)
+            {
+                _runReport.Status = "StopFailed";
+                _runReport.Error = ex.ToString();
+                _runReport.FinishedAtUtc = DateTimeOffset.UtcNow;
+                _runReport.AddEvent("StopFailed", ex.Message);
+                TrySaveRunReport();
+            }
+
             SetIdle();
             DisposeRecorder();
         }
@@ -185,6 +229,12 @@ public partial class MainWindow : Window
         {
             StateTextBlock.Text = e.Status.ToString();
             Log($"Status: {e.Status}");
+            if (_runReport is not null)
+            {
+                _runReport.Status = e.Status.ToString();
+                _runReport.AddEvent("StatusChanged", e.Status.ToString());
+                TrySaveRunReport();
+            }
         });
     }
 
@@ -193,6 +243,14 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() =>
         {
             Log($"Complete: {e.FilePath}");
+            if (_runReport is not null)
+            {
+                _runReport.Status = "Complete";
+                _runReport.FinishedAtUtc = DateTimeOffset.UtcNow;
+                _runReport.AddEvent("RecordingComplete", e.FilePath);
+                TrySaveRunReport();
+            }
+
             SetIdle();
             DisposeRecorder();
             OutputPathTextBox.Text = CreateDefaultOutputPath();
@@ -204,6 +262,15 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() =>
         {
             Log($"Recording failed: {e.Error}");
+            if (_runReport is not null)
+            {
+                _runReport.Status = "RecordingFailed";
+                _runReport.Error = e.Error;
+                _runReport.FinishedAtUtc = DateTimeOffset.UtcNow;
+                _runReport.AddEvent("RecordingFailed", e.Error);
+                TrySaveRunReport();
+            }
+
             SetIdle();
             DisposeRecorder();
         });
@@ -272,7 +339,32 @@ public partial class MainWindow : Window
         }
         finally
         {
+            if (_runReport is not null && _runReport.FinishedAtUtc is null)
+            {
+                _runReport.Status = "WindowClosed";
+                _runReport.FinishedAtUtc = DateTimeOffset.UtcNow;
+                _runReport.AddEvent("WindowClosed");
+                TrySaveRunReport();
+            }
+
             DisposeRecorder();
+        }
+    }
+
+    private void TrySaveRunReport()
+    {
+        if (_runReport is null || string.IsNullOrWhiteSpace(_runReportPath))
+        {
+            return;
+        }
+
+        try
+        {
+            _runReport.Save(_runReportPath);
+        }
+        catch (Exception ex)
+        {
+            Log($"Run report write failed: {ex.Message}");
         }
     }
 
