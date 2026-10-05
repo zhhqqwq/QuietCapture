@@ -2,7 +2,7 @@
 
 QuietCapture is a minimal Windows screen recorder built around a short workflow: **select → audio → record**.
 
-> Development status: **Phase 0 technical spike**. The repository currently contains the engineering scaffold and validation plan; recording behavior is not yet frozen for production use.
+> Development status: **Phase 1 Core foundation scaffold**. Phase 0 runtime validation and backend Architecture Freeze are still pending; production recording behavior is not yet frozen.
 
 ## Goals
 

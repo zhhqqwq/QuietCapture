@@ -50,3 +50,26 @@ Phase 0 runtime evidence is converted into production architecture through:
 - `docs/architecture-freeze-template.md`
 
 Until those ADRs are finalized from reviewed runtime evidence, this file documents only the already-frozen project boundaries, not the final backend-facing contracts.
+
+
+## Phase 1 Core foundation scaffold
+
+The following backend-independent Core rules are now implemented before backend Architecture Freeze:
+
+- physical-pixel `PixelRect` / `PixelSize` models and explicit even-dimension normalization;
+- Area / Window / Monitor capture-target domain models;
+- resolved per-session `RecordingOptions` with concrete audio-device IDs when audio is enabled;
+- `AppStateMachine` as the public application-flow state source;
+- Starting-time pending Stop represented without a direct `Starting → Stopping` transition;
+- persistent Session status/lifecycle rules with no public status setter;
+- same-output-tree working/final path planning models;
+- timestamp filename collision policy with `_001`, `_002`, ... suffixes.
+
+Not implemented yet:
+
+- ScreenRecorderLib-facing recording Ports or method signatures;
+- production SessionManager/RecorderService orchestration;
+- filesystem atomic reservation/write Ports;
+- backend Stop timeout value;
+- CFR/fragmented-MP4 backend configuration;
+- Window/Monitor/DPI policies that still depend on Phase 0 runtime evidence.
