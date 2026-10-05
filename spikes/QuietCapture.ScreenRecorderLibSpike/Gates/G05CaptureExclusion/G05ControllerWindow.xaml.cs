@@ -600,6 +600,11 @@ public partial class G05ControllerWindow : Window
         out int areaWidth,
         out int areaHeight)
     {
+        areaX = 0;
+        areaY = 0;
+        areaWidth = 0;
+        areaHeight = 0;
+
         mode = ParseCaptureMode();
         exclusionRequested =
             ExclusionCheckBox.IsChecked == true;
