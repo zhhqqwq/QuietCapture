@@ -211,7 +211,7 @@ Successful media publication is now a backend-independent Core operation perform
 
 If any prerequisite fails, the partial file is left in place. A filesystem move failure is reported as a failed publication and must preserve the partial media.
 
-The filesystem contract now includes `MoveFileReplacingEmptyReservation`. The Windows implementation revalidates the zero-byte reservation while holding a handle that permits delete/rename but denies new writers, then uses same-volume `MoveFileEx(REPLACE_EXISTING | WRITE_THROUGH)`. Cross-volume copy fallback is not enabled.
+The filesystem contract now includes `MoveFileReplacingEmptyReservation`. The Windows implementation locks and revalidates the zero-byte reservation, consumes only that empty placeholder, then performs a same-volume `MoveFileEx(WRITE_THROUGH)` without replace-existing semantics. If the move fails, the source partial remains and the adapter best-effort recreates the empty reservation. If another file appears at the final path during the narrow reservation-to-rename window, the no-replace move fails rather than overwriting it. Cross-volume copy fallback is not enabled.
 
 `SessionCleanupPolicy` only cleans safe terminal Sessions after recovery-index removal is complete:
 

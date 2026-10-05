@@ -5,8 +5,6 @@ namespace QuietCapture.Infrastructure.Windows.Storage;
 
 public sealed class AtomicMediaFileMover
 {
-    private const uint MoveFileReplaceExisting =
-        0x00000001;
     private const uint MoveFileWriteThrough =
         0x00000008;
 
@@ -40,32 +38,77 @@ public sealed class AtomicMediaFileMover
                 source);
         }
 
-        using var reservationLock =
-            new FileStream(
-                destination,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.Read |
-                FileShare.Delete);
+        ConsumeEmptyReservation(
+            destination);
 
-        if (reservationLock.Length != 0)
-        {
-            throw new IOException(
-                "Final-path reservation is not empty.");
-        }
-
-        if (!MoveFileExW(
+        if (MoveFileExW(
                 source,
                 destination,
-                MoveFileReplaceExisting |
                 MoveFileWriteThrough))
         {
-            int error =
-                Marshal.GetLastWin32Error();
+            return;
+        }
 
+        int error =
+            Marshal.GetLastWin32Error();
+
+        TryRestoreEmptyReservation(
+            destination);
+
+        throw new IOException(
+            $"Same-volume media move failed: {source} -> {destination}",
+            new Win32Exception(error));
+    }
+
+    private static void ConsumeEmptyReservation(
+        string destination)
+    {
+        using (var reservationLock =
+               new FileStream(
+                   destination,
+                   FileMode.Open,
+                   FileAccess.Read,
+                   FileShare.Read |
+                   FileShare.Delete))
+        {
+            if (reservationLock.Length != 0)
+            {
+                throw new IOException(
+                    "Final-path reservation is not empty.");
+            }
+
+            File.Delete(destination);
+        }
+
+        if (File.Exists(destination))
+        {
             throw new IOException(
-                $"Same-volume media move failed: {source} -> {destination}",
-                new Win32Exception(error));
+                "Final-path reservation could not be consumed.");
+        }
+    }
+
+    private static void TryRestoreEmptyReservation(
+        string destination)
+    {
+        try
+        {
+            using var stream =
+                new FileStream(
+                    destination,
+                    FileMode.CreateNew,
+                    FileAccess.Write,
+                    FileShare.Read,
+                    bufferSize: 1,
+                    FileOptions.WriteThrough);
+
+            stream.Flush(
+                flushToDisk: true);
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
         }
     }
 
