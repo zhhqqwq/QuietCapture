@@ -12,6 +12,14 @@ public interface IFileSystem
 
     long GetFileLength(string path);
 
+    string ReadAllText(string path);
+
+    IReadOnlyList<string> EnumerateDirectories(
+        string path);
+
+    IReadOnlyList<string> EnumerateFiles(
+        string path);
+
     bool TryReserveFile(string path);
 
     bool DeleteFileIfEmpty(string path);

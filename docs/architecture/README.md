@@ -95,3 +95,30 @@ If creation fails, only an unused empty final reservation is released. Non-empty
 `SessionMetadataDocument` is a versioned primitive persistence shape. `RecoveryIndexEntry` stores only Session ID and working directory.
 
 Still deferred: Windows filesystem implementation, final media move/replace, recovery scanning, and backend Start/Stop orchestration.
+
+
+## Phase 1 Recovery foundation
+
+Recovery discovery is now a read-only Core operation.
+
+`RecoveryService` merges two discovery sources by normalized Session working directory:
+
+- entries from the small `recovery-index.json`;
+- direct Session directories under known `.screenrecorder/sessions` roots.
+
+Each discovered directory is classified as one of:
+
+- `NoRecoveryRequired`;
+- `Interrupted`;
+- `StopFailed`;
+- `Orphaned`.
+
+Classification rules currently treat persisted `Created`, `Starting`, `Recording`, `Finalizing`, and `Interrupted` residuals as Interrupted recovery candidates. Persisted StopFailed remains StopFailed. Missing/corrupt/invalid metadata and identity mismatches are Orphaned. Completed/FailedToStart sessions need no recovery unless a non-empty partial file remains, which is treated as an orphaned inconsistency.
+
+Recovery scanning never deletes or repairs media. In particular, non-empty `recording.partial.mp4` files are preserved byte-for-byte by discovery.
+
+`SessionDocumentValidator` validates the versioned persistence document before classification, including Session identity/status, working/temp paths, capture-target shape, output geometry, frame rate, quality ID, and concrete audio-device IDs when enabled.
+
+`RecoveryIndexJson` persists only a schema version plus Session ID / working-directory pairs.
+
+Still deferred: writing/updating the recovery index from the application lifecycle, Windows filesystem implementation, user-facing recovery actions, media repair/remux, and cleanup policy for `NoRecoveryRequired` working directories.
