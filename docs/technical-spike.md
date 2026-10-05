@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 0 has not started. This document is the authoritative record of G0 evidence, results, and architecture consequences.
+Phase 0 is active. This document is the authoritative record of G0 evidence, results, and architecture consequences.
 
 Allowed gate states: NOT RUN, PASS, PASS WITH WORKAROUND, FAIL.
 
@@ -10,27 +10,30 @@ Allowed gate states: NOT RUN, PASS, PASS WITH WORKAROUND, FAIL.
 
 | Item | Value |
 | --- | --- |
-| Date | TBD |
-| Windows version/build | TBD |
-| GPU / driver | TBD |
-| Display topology / DPI | TBD |
-| .NET SDK | TBD |
-| ScreenRecorderLib version | TBD |
-| Audio devices | TBD |
+| Date | 2026-10-05 |
+| Windows version/build | TBD on test machine |
+| GPU / driver | TBD on test machine |
+| Display topology / DPI | TBD on test machine |
+| .NET SDK | .NET 8 |
+| ScreenRecorderLib version | 7.0.1 |
+| Audio devices | Not used by G0-1 |
 
 ## G0-1 — Area capture
 **Status:** NOT RUN
 
-Validate arbitrary single-monitor physical-pixel rectangles, even dimensions, cursor behavior, MP4 output, and basic frame pacing.
+The G0-1 harness is now in spikes/QuietCapture.ScreenRecorderLibSpike. It uses one DisplayRecordingSource with SourceRect, fixed output dimensions matching the rectangle, 30 FPS fixed-framerate H.264, audio disabled, and per-run ScreenRecorderLib debug logging.
 
 ### Evidence
-TBD
+
+Harness prepared. Runtime evidence is pending Windows execution using the matrix in spikes/QuietCapture.ScreenRecorderLibSpike/Gates/G01AreaCapture/README.md.
 
 ### Result
-TBD
+
+TBD after runtime validation.
 
 ### Architecture consequence
-TBD
+
+Do not define the production area-capture backend contract until the test establishes ScreenRect coordinate semantics, boundary behavior, output dimensions, cursor behavior, and Stop reliability.
 
 ## G0-2 — System audio
 **Status:** NOT RUN
@@ -120,4 +123,7 @@ TBD
 TBD
 
 ## Open questions
-TBD
+
+- Are DisplayRecordingSource.SourceRect X/Y values source-local or virtual-desktop coordinates for every display/API combination?
+- Are there alignment constraints beyond even output width/height?
+- Does normal Stop remain reliable across tested rectangles and display configurations?
