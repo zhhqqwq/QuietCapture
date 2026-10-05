@@ -34,15 +34,16 @@ See [`docs/engineering-baseline.md`](docs/engineering-baseline.md) for the curre
 ## Requirements
 
 - Windows 10 version 2004 (build 19041) or later, or Windows 11.
+- x64 Windows for the current Phase 0 ScreenRecorderLib route.
 - .NET 8 SDK.
 - A Windows development environment capable of building WPF projects.
 
 ## Build
 
 ```powershell
-dotnet restore QuietCapture.sln
-dotnet build QuietCapture.sln --configuration Release --no-restore
-dotnet test QuietCapture.sln --configuration Release --no-build
+dotnet restore QuietCapture.sln -p:Platform=x64
+dotnet build QuietCapture.sln --configuration Release -p:Platform=x64 --no-restore
+dotnet test QuietCapture.sln --configuration Release -p:Platform=x64 --no-build
 ```
 
 ## Repository layout

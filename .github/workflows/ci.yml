@@ -19,8 +19,8 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - name: Restore
-        run: dotnet restore QuietCapture.sln
+        run: dotnet restore QuietCapture.sln -p:Platform=x64
       - name: Build
-        run: dotnet build QuietCapture.sln --configuration Release --no-restore
+        run: dotnet build QuietCapture.sln --configuration Release -p:Platform=x64 --no-restore
       - name: Test
-        run: dotnet test QuietCapture.sln --configuration Release --no-build
+        run: dotnet test QuietCapture.sln --configuration Release -p:Platform=x64 --no-build

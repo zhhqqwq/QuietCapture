@@ -37,10 +37,12 @@ fix: preserve interrupted session metadata
 
 ## Build and test
 
+QuietCapture currently uses an x64 solution platform because the Phase 0 ScreenRecorderLib package rejects Any CPU builds.
+
 ~~~powershell
-dotnet restore QuietCapture.sln
-dotnet build QuietCapture.sln --configuration Release --no-restore
-dotnet test QuietCapture.sln --configuration Release --no-build
+dotnet restore QuietCapture.sln -p:Platform=x64
+dotnet build QuietCapture.sln --configuration Release -p:Platform=x64 --no-restore
+dotnet test QuietCapture.sln --configuration Release -p:Platform=x64 --no-build
 ~~~
 
 ## Scope changes
