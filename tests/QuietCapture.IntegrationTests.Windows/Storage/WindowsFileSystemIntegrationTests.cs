@@ -174,6 +174,43 @@ public sealed class WindowsFileSystemIntegrationTests
     }
 
     [Fact]
+    public void VolumeInfo_ExistingFileUsesContainingVolumeAndFreeSpace()
+    {
+        using var scope =
+            TestDirectoryScope.Create();
+
+        string filePath =
+            Path.Combine(
+                scope.Path,
+                "existing.bin");
+
+        File.WriteAllText(
+            filePath,
+            "data");
+
+        var resolver =
+            new VolumeInfoResolver();
+
+        StorageVolumeInfo directoryInfo =
+            resolver.Resolve(
+                scope.Path);
+        StorageVolumeInfo fileInfo =
+            resolver.Resolve(
+                filePath);
+
+        Assert.Equal(
+            directoryInfo.VolumeId,
+            fileInfo.VolumeId,
+            ignoreCase: true);
+        Assert.Equal(
+            directoryInfo.FileSystem,
+            fileInfo.FileSystem,
+            ignoreCase: true);
+        Assert.True(
+            fileInfo.AvailableBytes > 0);
+    }
+
+    [Fact]
     public void DirectoryAndFileEnumeration_ReturnOnlyDirectChildren()
     {
         using var scope =

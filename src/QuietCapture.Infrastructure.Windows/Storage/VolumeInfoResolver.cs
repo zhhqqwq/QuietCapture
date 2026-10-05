@@ -32,8 +32,15 @@ public sealed class VolumeInfoResolver
         VolumeDetails details =
             GetVolumeDetails(volumePath);
 
+        string freeSpacePath =
+            File.Exists(anchor)
+                ? Path.GetDirectoryName(anchor)
+                    ?? volumePath
+                : anchor;
+
         long availableBytes =
-            GetAvailableBytes(anchor);
+            GetAvailableBytes(
+                freeSpacePath);
 
         string volumeId =
             TryGetVolumeGuid(volumePath)
