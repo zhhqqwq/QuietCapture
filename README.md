@@ -29,7 +29,7 @@ QuietCapture.UI.Wpf → QuietCapture.Core ← QuietCapture.Infrastructure.Window
 
 `QuietCapture.Core` owns product state and policies. Windows APIs, ScreenRecorderLib, NAudio, and other platform dependencies belong in `QuietCapture.Infrastructure.Windows`. `QuietCapture.App` is the composition root.
 
-See [`docs/engineering-baseline.md`](docs/engineering-baseline.md) for the current engineering baseline, [`docs/technical-spike.md`](docs/technical-spike.md) for Phase 0 results, and [`docs/phase0-execution-guide.md`](docs/phase0-execution-guide.md) for the frozen Phase 0 runtime procedure.
+See [`docs/engineering-baseline.md`](docs/engineering-baseline.md) for the current engineering baseline, [`docs/technical-spike.md`](docs/technical-spike.md) for Phase 0 results, [`docs/phase0-execution-guide.md`](docs/phase0-execution-guide.md) for the frozen Phase 0 runtime procedure, and [`docs/architecture-freeze-template.md`](docs/architecture-freeze-template.md) for the evidence-to-architecture freeze procedure.
 
 ## Requirements
 

@@ -6,7 +6,7 @@ Phase 0 Harness Freeze is complete. Runtime validation is pending. This document
 
 Allowed gate states: NOT RUN, PASS, PASS WITH WORKAROUND, FAIL.
 
-The frozen execution procedure is in `docs/phase0-execution-guide.md`. G0-0 is a clean-machine prerequisite with READY/BLOCKED status; it is not an architecture gate.
+The frozen execution procedure is in `docs/phase0-execution-guide.md`. G0-0 is a clean-machine prerequisite with READY/BLOCKED status; it is not an architecture gate. Reviewed G0 decisions feed the ADR templates in `docs/decisions/` and the final `docs/architecture-freeze-template.md`.
 
 ## Environment
 

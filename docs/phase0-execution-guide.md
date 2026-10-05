@@ -272,9 +272,10 @@ For each gate:
    - Evidence;
    - Result;
    - Architecture consequence.
-7. If the result changes a production decision, create/update the matching ADR under `docs/decisions/`.
+7. Update the mapped ADR under `docs/decisions/`; do not finalize its status until its Evidence Required checklist is satisfied.
 8. Link the commit/ADR/result back to the GitHub issue.
 9. Close the issue only when the gate decision and architecture consequence are recorded in the repository.
+10. When all mapped ADRs are finalized, complete `docs/architecture-freeze-template.md` and then update `docs/architecture/README.md` to the frozen production architecture.
 
 If new evidence invalidates an earlier decision, reopen the issue, return the gate to the appropriate unresolved state, and update the ADR rather than silently editing history.
 
@@ -337,8 +338,9 @@ Do not start the production architecture freeze until all mandatory Phase 0 gate
 Before Phase 1 production implementation proceeds beyond scaffolding:
 
 - [ ] `docs/technical-spike.md` contains all final gate decisions;
-- [ ] required ADRs exist;
+- [ ] required ADRs under `docs/decisions/` are finalized;
 - [ ] unresolved open questions are either closed or explicitly deferred outside v1;
+- [ ] `docs/architecture-freeze-template.md` is complete;
 - [ ] architecture document matches the decided route;
 - [ ] test plan contains regression coverage for every PASS WITH WORKAROUND;
 - [ ] Phase 0 issues #1–#7 are linked to repository evidence.

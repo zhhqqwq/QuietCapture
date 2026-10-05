@@ -1,14 +1,14 @@
-# Architecture Decision Records
+# Architecture Decision Records — Moved
 
-Use ADRs after a technical choice is supported by evidence or a product constraint and has architecture impact.
+The original repository bootstrap created this directory as an ADR placeholder.
 
-File naming:
+The canonical ADR location for Phase 0 Architecture Freeze and later architecture decisions is now:
 
-~~~text
-0001-short-decision-title.md
-0002-next-decision.md
-~~~
+`docs/decisions/`
 
-Recommended sections: Status, Context, Decision, Consequences.
+See:
 
-Expected Phase 0 ADR candidates include recording backend strategy, fragmented MP4 policy, monitor capture API, window resize behavior, and Stop timeout policy.
+- `docs/decisions/README.md`
+- `docs/architecture-freeze-template.md`
+
+Do not add new ADR files under `docs/adr/`.
