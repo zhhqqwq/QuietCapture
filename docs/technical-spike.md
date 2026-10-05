@@ -2,9 +2,11 @@
 
 ## Status
 
-Phase 0 is active. This document is the authoritative record of G0 evidence, results, and architecture consequences.
+Phase 0 Harness Freeze is complete. Runtime validation is pending. This document is the authoritative record of G0 evidence, results, and architecture consequences.
 
 Allowed gate states: NOT RUN, PASS, PASS WITH WORKAROUND, FAIL.
+
+The frozen execution procedure is in `docs/phase0-execution-guide.md`. G0-0 is a clean-machine prerequisite with READY/BLOCKED status; it is not an architecture gate.
 
 ## Environment
 
@@ -17,6 +19,30 @@ Allowed gate states: NOT RUN, PASS, PASS WITH WORKAROUND, FAIL.
 | .NET SDK | .NET 8 |
 | ScreenRecorderLib version | 7.0.1 |
 | Audio devices | TBD on test machine |
+
+## G0-0 — Clean-machine prerequisite
+
+**Status:** NOT RUN ON TEST MACHINE
+
+G0-0 verifies that a new Windows test machine can execute the Phase 0 harnesses before runtime gate evidence is collected.
+
+The unified launcher records Windows/build/architecture, .NET SDK, Visual C++ runtime files, Media Foundation files, evidence-root writability, evidence-volume filesystem, and free space to:
+
+`%TEMP%\QuietCaptureSpike\Phase0\g0-0-prerequisite.json`
+
+G0-0 uses READY/BLOCKED rather than PASS/FAIL. A BLOCKED prerequisite stops the assisted Phase 0 sequence until corrected.
+
+### Evidence
+
+Harness prepared in `spikes/QuietCapture.ScreenRecorderLibSpike/run-phase0.ps1`.
+
+### Result
+
+TBD on Windows test machine.
+
+### Architecture consequence
+
+None directly. G0-0 validates the execution environment and deployment prerequisites used to trust G0-1 through G0-7 evidence.
 
 ## G0-1 — Area capture
 **Status:** NOT RUN

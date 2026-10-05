@@ -4,6 +4,21 @@ This project is the Phase 0 experiment harness for QuietCapture.
 
 It is intentionally isolated from the production projects. Spike code may call third-party or Windows APIs directly so that the experiment measures their real behavior before QuietCapture freezes production abstractions.
 
+## Phase 0 launcher
+
+Use the unified launcher to inspect or run the frozen Phase 0 sequence:
+
+```powershell
+.\run-phase0.ps1 -Gate list
+.\run-phase0.ps1 -Gate g0-0
+.\run-phase0.ps1 -Gate g0-4
+.\run-phase0.ps1 -Gate all
+```
+
+`g0-0` performs the clean-machine prerequisite check. `all` runs that prerequisite first, then launches G0-1 through G0-7 sequentially. No launcher mode changes a gate result automatically.
+
+See `docs/phase0-execution-guide.md` for the evidence and decision procedure.
+
 ## Prepared harnesses
 
 - `run-g0-1.ps1` — area capture using an explicit display and SourceRect.
@@ -14,7 +29,7 @@ It is intentionally isolated from the production projects. Spike code may call t
 - `run-g0-6.ps1` — multi-round Controller/Worker stability sampling and Stop-latency aggregation.
 - `run-g0-7.ps1` — Window lifecycle, display API, virtual-coordinate, multi-monitor, and DPI diagnostics.
 
-A prepared harness does not change a gate result. Runtime-dependent gates remain NOT RUN until reviewed Windows evidence exists.
+A prepared harness does not change a gate result. Phase 0 Harness Freeze is complete; runtime-dependent gates remain NOT RUN until reviewed Windows evidence exists.
 
 ## G0 gates
 
