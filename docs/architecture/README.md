@@ -73,3 +73,25 @@ Not implemented yet:
 - backend Stop timeout value;
 - CFR/fragmented-MP4 backend configuration;
 - Window/Monitor/DPI policies that still depend on Phase 0 runtime evidence.
+
+
+## Phase 1 Session + Storage foundation
+
+The Core storage boundary now defines `IFileSystem` for volume queries, atomic final-path reservation, atomic small-metadata writes, and safe cleanup of unused placeholders.
+
+`OutputPlanner` rejects non-writable output volumes and FAT32, verifies that the derived Session working directory resolves to the same volume identity as the final output, and reserves the first available timestamp filename atomically.
+
+A successful final-path reservation is a zero-byte placeholder. Later finalize code must replace that placeholder through the filesystem abstraction rather than selecting a new name after recording has started.
+
+`SessionManager.CreateSession` now performs backend-independent creation in this order:
+
+1. reserve final output path;
+2. create same-volume Session working directory;
+3. create `SessionMetadata` in `Created`;
+4. atomically write `session.json`.
+
+If creation fails, only an unused empty final reservation is released. Non-empty `recording.partial.mp4` media is preserved.
+
+`SessionMetadataDocument` is a versioned primitive persistence shape. `RecoveryIndexEntry` stores only Session ID and working directory.
+
+Still deferred: Windows filesystem implementation, final media move/replace, recovery scanning, and backend Start/Stop orchestration.

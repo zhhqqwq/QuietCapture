@@ -10,16 +10,20 @@ public sealed record OutputPlan
         "sessions";
     private const string PartialMediaFileName =
         "recording.partial.mp4";
+    private const string SessionMetadataFileName =
+        "session.json";
 
     private OutputPlan(
         string outputDirectory,
         string workingDirectory,
         string tempMediaPath,
+        string sessionMetadataPath,
         string finalMediaPath)
     {
         OutputDirectory = outputDirectory;
         WorkingDirectory = workingDirectory;
         TempMediaPath = tempMediaPath;
+        SessionMetadataPath = sessionMetadataPath;
         FinalMediaPath = finalMediaPath;
     }
 
@@ -28,6 +32,8 @@ public sealed record OutputPlan
     public string WorkingDirectory { get; }
 
     public string TempMediaPath { get; }
+
+    public string SessionMetadataPath { get; }
 
     public string FinalMediaPath { get; }
 
@@ -80,6 +86,9 @@ public sealed record OutputPlan
             Path.Combine(
                 workingDirectory,
                 PartialMediaFileName),
+            Path.Combine(
+                workingDirectory,
+                SessionMetadataFileName),
             Path.Combine(
                 outputDirectory,
                 finalFileName));
