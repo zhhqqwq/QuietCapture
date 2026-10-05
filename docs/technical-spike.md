@@ -42,7 +42,7 @@ The G0-2 harness is prepared using the ScreenRecorderLib 7.0.1 audio-source mode
 
 ### Evidence
 
-Harness prepared. Each run will write MP4 output, a ScreenRecorderLib debug log, and a `*.g0-2.json` report containing the selected device ID, device enumeration snapshot, recorder state changes, and audio packet/byte counts.
+Harness prepared and CI-compilable. Each run will write MP4 output, a ScreenRecorderLib debug log, and a `*.g0-2.json` report containing the selected device ID, device enumeration snapshot, recorder state changes, and audio packet/byte counts.
 
 Runtime evidence is pending Windows execution using the matrix in `Gates/G02SystemAudio/README.md`.
 
@@ -57,16 +57,23 @@ The candidate production policy is to resolve a user preference to one concrete 
 ## G0-3 — System audio + microphone
 **Status:** NOT RUN
 
-Validate simultaneous system audio and microphone capture, selected device identity, and A/V sync.
+The G0-3 harness enumerates both loopback output devices and capture/microphone devices, binds one concrete ID for each before Start, creates one `LoopbackAudioSource` and one `CaptureAudioSource`, and records them together in one audio track. Per-source ScreenRecorderLib IDs are retained so audio packet evidence can be attributed to loopback, microphone, or unknown sources.
 
 ### Evidence
-TBD
+
+Harness prepared. Each run will write MP4 output, a ScreenRecorderLib debug log, and a `*.g0-3.json` report containing both device IDs, both source IDs, enumeration snapshots, state changes, mixed packet/byte counts, and source-specific packet/byte counts.
+
+A/V sync is not inferred from callback arrival times. Runtime validation must inspect the resulting media with an audible/visible reference event or media-analysis tooling.
+
+Runtime evidence is pending Windows execution using the matrix in `Gates/G03SystemAudioMicrophone/README.md`.
 
 ### Result
-TBD
+
+TBD after runtime validation.
 
 ### Architecture consequence
-TBD
+
+The candidate session model resolves both system-audio and microphone preferences to concrete IDs before Start and keeps those IDs fixed for the session. Do not freeze device-loss handling, source-mix assumptions, or A/V sync guarantees until G0-3 runtime evidence is reviewed.
 
 ## G0-4 — Media and crash recovery
 **Status:** NOT RUN
@@ -134,3 +141,6 @@ TBD
 - Does normal Stop remain reliable across tested rectangles and display configurations?
 - Does a selected loopback device remain bound if the Windows default output device changes during an active recording?
 - How does ScreenRecorderLib report an unavailable or removed loopback device?
+- Does a selected microphone remain bound if the Windows default input device changes during an active recording?
+- How does ScreenRecorderLib report microphone removal or privacy/access failure during an active recording?
+- Does the library consistently mix loopback + microphone into one track with acceptable A/V sync?

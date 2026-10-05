@@ -1,0 +1,84 @@
+<Window x:Class="QuietCapture.ScreenRecorderLibSpike.Gates.G03SystemAudioMicrophone.G03SystemAudioMicrophoneWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="QuietCapture G0-3 System Audio + Microphone"
+        Width="900"
+        Height="720"
+        MinWidth="820"
+        MinHeight="650"
+        WindowStartupLocation="CenterScreen"
+        Closed="Window_Closed">
+  <Grid Margin="20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0">
+      <TextBlock FontSize="22" FontWeight="SemiBold" Text="G0-3 — System Audio + Microphone" />
+      <TextBlock Margin="0,6,0,0"
+                 TextWrapping="Wrap"
+                 Text="Records one full display plus one explicitly selected loopback output device and one explicitly selected capture/microphone device. Both device IDs are fixed before Start." />
+    </StackPanel>
+
+    <Grid Grid.Row="1" Margin="0,18,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="160" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Text="Video display" />
+      <ComboBox x:Name="DisplayComboBox" Grid.Column="1" MinWidth="500" DisplayMemberPath="Label" />
+      <Button Grid.Column="2" Margin="10,0,0,0" Padding="14,6" Content="Refresh" Click="RefreshButton_Click" />
+    </Grid>
+
+    <Grid Grid.Row="2" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="160" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Text="System audio device" />
+      <ComboBox x:Name="LoopbackDeviceComboBox" Grid.Column="1" MinWidth="560" DisplayMemberPath="Label" />
+    </Grid>
+
+    <Grid Grid.Row="3" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="160" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Text="Microphone device" />
+      <ComboBox x:Name="MicrophoneDeviceComboBox" Grid.Column="1" MinWidth="560" DisplayMemberPath="Label" />
+    </Grid>
+
+    <Grid Grid.Row="4" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="160" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Text="Output MP4" />
+      <TextBox x:Name="OutputPathTextBox" Grid.Column="1" />
+      <Button Grid.Column="2" Margin="10,0,0,0" Padding="14,6" Content="Browse..." Click="BrowseButton_Click" />
+    </Grid>
+
+    <StackPanel Grid.Row="5" Margin="0,16,0,16" Orientation="Horizontal">
+      <Button x:Name="StartButton" Padding="20,8" Content="Start" Click="StartButton_Click" />
+      <Button x:Name="StopButton" Margin="10,0,0,0" Padding="20,8" Content="Stop" IsEnabled="False" Click="StopButton_Click" />
+      <TextBlock x:Name="StateTextBlock" Margin="20,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold" Text="Idle" />
+      <TextBlock x:Name="PacketTextBlock" Margin="20,0,0,0" VerticalAlignment="Center" Text="Packets: loopback 0 / mic 0" />
+    </StackPanel>
+
+    <TextBox x:Name="LogTextBox"
+             Grid.Row="6"
+             IsReadOnly="True"
+             AcceptsReturn="True"
+             VerticalScrollBarVisibility="Auto"
+             HorizontalScrollBarVisibility="Auto"
+             TextWrapping="NoWrap" />
+  </Grid>
+</Window>
