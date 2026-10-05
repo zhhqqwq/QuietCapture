@@ -122,3 +122,40 @@ Recovery scanning never deletes or repairs media. In particular, non-empty `reco
 `RecoveryIndexJson` persists only a schema version plus Session ID / working-directory pairs.
 
 Still deferred: writing/updating the recovery index from the application lifecycle, Windows filesystem implementation, user-facing recovery actions, media repair/remux, and cleanup policy for `NoRecoveryRequired` working directories.
+
+
+## Phase 1 Windows Storage infrastructure
+
+`QuietCapture.Infrastructure.Windows.Storage` now implements the Core filesystem contract without introducing any recording-backend dependency.
+
+### Final-path reservation
+
+`WindowsFileSystem.TryReserveFile` uses `FileMode.CreateNew`. The filesystem therefore decides the winner atomically when multiple sessions compete for the same final path; an existing path is never silently overwritten.
+
+### Atomic text metadata
+
+`AtomicTextFileWriter` writes UTF-8 metadata to a unique temporary file in the destination directory, flushes the file to disk, and then uses a same-directory Windows rename/replace with write-through semantics. A failed replace removes the temporary file while leaving the previous destination file intact.
+
+This mechanism is intended for small durable metadata such as `session.json` and `recovery-index.json`, not for MP4 finalization.
+
+### Volume identity
+
+`VolumeInfoResolver` resolves the containing Windows volume from the nearest existing ancestor of a prospective path. It records:
+
+- stable volume GUID when Windows exposes one, with mount-point/serial fallback;
+- filesystem name;
+- free bytes available to the current caller;
+- read-only-volume state.
+
+This allows Core same-volume planning to compare actual mounted volumes instead of only drive-letter strings.
+
+### Safe cleanup and discovery
+
+The Windows adapter implements direct-child directory/file enumeration and only deletes a reserved file when it is still zero bytes. Empty-directory cleanup is non-recursive.
+
+Still deferred:
+
+- partial-media → final-media move/rename policy;
+- recovery-index lifecycle writes from application orchestration;
+- cleanup of completed Session working directories;
+- recording backend integration.
