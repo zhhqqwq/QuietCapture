@@ -16,16 +16,16 @@ Allowed gate states: NOT RUN, PASS, PASS WITH WORKAROUND, FAIL.
 | Display topology / DPI | TBD on test machine |
 | .NET SDK | .NET 8 |
 | ScreenRecorderLib version | 7.0.1 |
-| Audio devices | Not used by G0-1 |
+| Audio devices | TBD on test machine |
 
 ## G0-1 — Area capture
 **Status:** NOT RUN
 
-The G0-1 harness is now in spikes/QuietCapture.ScreenRecorderLibSpike. It uses one DisplayRecordingSource with SourceRect, fixed output dimensions matching the rectangle, 30 FPS fixed-framerate H.264, audio disabled, and per-run ScreenRecorderLib debug logging.
+The G0-1 harness is in `spikes/QuietCapture.ScreenRecorderLibSpike`. It uses one `DisplayRecordingSource` with `SourceRect`, fixed output dimensions matching the rectangle, 30 FPS fixed-framerate H.264, audio disabled, and per-run ScreenRecorderLib plus JSON evidence.
 
 ### Evidence
 
-Harness prepared. Runtime evidence is pending Windows execution using the matrix in spikes/QuietCapture.ScreenRecorderLibSpike/Gates/G01AreaCapture/README.md.
+Harness prepared and CI-compilable. Runtime evidence is pending Windows execution using the matrix in `Gates/G01AreaCapture/README.md`.
 
 ### Result
 
@@ -38,16 +38,21 @@ Do not define the production area-capture backend contract until the test establ
 ## G0-2 — System audio
 **Status:** NOT RUN
 
-Validate system-audio capture, silent periods, audio-track presence, and device-change behavior.
+The G0-2 harness is prepared using the ScreenRecorderLib 7.0.1 audio-source model. It enumerates loopback devices with `Recorder.GetSystemAudioLoopbackDevices()`, binds the selected concrete `DeviceName` through `LoopbackAudioSource`, records full-display video plus system audio, and enables audio-packet preview for packet/byte evidence.
 
 ### Evidence
-TBD
+
+Harness prepared. Each run will write MP4 output, a ScreenRecorderLib debug log, and a `*.g0-2.json` report containing the selected device ID, device enumeration snapshot, recorder state changes, and audio packet/byte counts.
+
+Runtime evidence is pending Windows execution using the matrix in `Gates/G02SystemAudio/README.md`.
 
 ### Result
-TBD
+
+TBD after runtime validation.
 
 ### Architecture consequence
-TBD
+
+The candidate production policy is to resolve a user preference to one concrete output-device ID before Start and keep that ID fixed for the session. Do not freeze the Core audio port or device-loss policy until G0-2/G0-3 runtime evidence verifies how ScreenRecorderLib behaves.
 
 ## G0-3 — System audio + microphone
 **Status:** NOT RUN
@@ -127,3 +132,5 @@ TBD
 - Are DisplayRecordingSource.SourceRect X/Y values source-local or virtual-desktop coordinates for every display/API combination?
 - Are there alignment constraints beyond even output width/height?
 - Does normal Stop remain reliable across tested rectangles and display configurations?
+- Does a selected loopback device remain bound if the Windows default output device changes during an active recording?
+- How does ScreenRecorderLib report an unavailable or removed loopback device?
