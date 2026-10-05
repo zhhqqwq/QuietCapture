@@ -3,6 +3,7 @@ using QuietCapture.ScreenRecorderLibSpike.Gates.G02SystemAudio;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G03SystemAudioMicrophone;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G04MediaCrashRecovery;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G05CaptureExclusion;
+using QuietCapture.ScreenRecorderLibSpike.Gates.G06StabilityStopLatency;
 
 namespace QuietCapture.ScreenRecorderLibSpike;
 
@@ -23,12 +24,21 @@ public partial class App : Application
             return;
         }
 
+        if (string.Equals(gate, "g0-6-worker", StringComparison.OrdinalIgnoreCase))
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            int exitCode = await G06Worker.RunAsync(arguments);
+            Shutdown(exitCode);
+            return;
+        }
+
         Window window = gate?.ToLowerInvariant() switch
         {
             "g0-2" => new G02SystemAudioWindow(),
             "g0-3" => new G03SystemAudioMicrophoneWindow(),
             "g0-4" => new G04ControllerWindow(),
             "g0-5" => new G05ControllerWindow(),
+            "g0-6" => new G06ControllerWindow(),
             _ => new MainWindow()
         };
 

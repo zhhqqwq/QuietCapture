@@ -1,0 +1,116 @@
+<Window x:Class="QuietCapture.ScreenRecorderLibSpike.Gates.G06StabilityStopLatency.G06ControllerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="QuietCapture G0-6 Stability + Stop Latency"
+        Width="900"
+        Height="700"
+        MinWidth="820"
+        MinHeight="640"
+        WindowStartupLocation="CenterScreen">
+  <Grid Margin="20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0">
+      <TextBlock FontSize="22"
+                 FontWeight="SemiBold"
+                 Text="G0-6 — Stability + Stop Latency" />
+      <TextBlock Margin="0,6,0,0"
+                 TextWrapping="Wrap"
+                 Text="Runs independent recorder Workers sequentially. The Controller samples process memory, cumulative CPU time, derived CPU utilization, output growth, and elapsed time. The Worker measures Stop() → RecordingComplete with a monotonic clock." />
+    </StackPanel>
+
+    <Grid Grid.Row="1" Margin="0,18,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="160" />
+        <ColumnDefinition Width="190" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <TextBlock VerticalAlignment="Center" Text="Rounds" />
+      <TextBox x:Name="RoundsTextBox"
+               Grid.Column="1"
+               Text="3" />
+
+      <TextBlock Grid.Column="2"
+                 Margin="24,0,0,0"
+                 VerticalAlignment="Center"
+                 Text="Run seconds" />
+      <TextBox x:Name="RunSecondsTextBox"
+               Grid.Column="3"
+               Text="1800" />
+    </Grid>
+
+    <Grid Grid.Row="2" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="160" />
+        <ColumnDefinition Width="190" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <TextBlock VerticalAlignment="Center" Text="Sample interval ms" />
+      <TextBox x:Name="SampleIntervalTextBox"
+               Grid.Column="1"
+               Text="1000" />
+
+      <TextBlock Grid.Column="2"
+                 Margin="24,0,0,0"
+                 VerticalAlignment="Center"
+                 Text="Long-run targets" />
+      <TextBlock Grid.Column="3"
+                 VerticalAlignment="Center"
+                 Text="30 min / 60 min / later 8 h" />
+    </Grid>
+
+    <Grid Grid.Row="3" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Text="Evidence root" />
+      <TextBox x:Name="EvidenceRootTextBox"
+               Grid.Column="1"
+               IsReadOnly="True" />
+    </Grid>
+
+    <StackPanel Grid.Row="4"
+                Margin="0,18,0,0"
+                Orientation="Horizontal">
+      <Button x:Name="RunButton"
+              Padding="20,8"
+              Content="Run Batch"
+              Click="RunButton_Click" />
+      <TextBlock x:Name="StateTextBlock"
+                 Margin="20,0,0,0"
+                 VerticalAlignment="Center"
+                 FontWeight="SemiBold"
+                 Text="Idle" />
+      <TextBlock x:Name="ProgressTextBlock"
+                 Margin="20,0,0,0"
+                 VerticalAlignment="Center"
+                 Text="0 / 0" />
+    </StackPanel>
+
+    <TextBlock Grid.Row="5"
+               Margin="0,16,0,8"
+               TextWrapping="Wrap"
+               Text="CPU % is normalized across logical processors from deltas of Process.TotalProcessorTime. GPU and A/V sync remain external runtime observations for this gate." />
+
+    <TextBox x:Name="LogTextBox"
+             Grid.Row="6"
+             IsReadOnly="True"
+             AcceptsReturn="True"
+             VerticalScrollBarVisibility="Auto"
+             HorizontalScrollBarVisibility="Auto"
+             TextWrapping="NoWrap" />
+  </Grid>
+</Window>

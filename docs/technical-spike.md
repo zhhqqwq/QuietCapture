@@ -126,16 +126,36 @@ Do not freeze the final overlay implementation until G0-5 proves the actual Stat
 ## G0-6 — Stability and Stop latency
 **Status:** NOT RUN
 
-Run 30–60 minute sessions and measure CPU, GPU, memory, output growth, A/V sync, and Stop duration. Record Stop P50 and P95.
+The G0-6 harness uses a separate Controller and Recorder Worker process. Each Worker records the main monitor with fixed 30 FPS H.264, hardware encoding, ordinary MP4, and audio disabled so the stability experiment does not absorb G0-2/G0-3/G0-4 variables.
+
+The Controller runs multiple Workers sequentially. After each Worker reaches `RecorderStatus.Recording`, it periodically samples the Worker process from outside:
+
+- Working Set;
+- Private Bytes;
+- cumulative `Process.TotalProcessorTime`;
+- CPU utilization derived from processor-time/wall-time deltas and normalized across logical processors;
+- current output-file size;
+- recording elapsed time.
+
+Every sample is flushed immediately to a batch-level CSV. Per-run summaries record start/final/max memory, Private Bytes growth, an ordinary least-squares Private Bytes slope in MiB/hour, average/max CPU, final output size, Worker status, and Stop latency.
 
 ### Evidence
-TBD
+
+The Worker measures Stop latency with `Stopwatch.GetTimestamp()` immediately before `Recorder.Stop()` and again at entry to `OnRecordingComplete`. The Controller aggregates successful measured runs and calculates P50/P95 using linear interpolation.
+
+A batch produces `batch-manifest.json`, `samples.csv`, and `summary.md`; each run directory retains its MP4, ScreenRecorderLib log, Worker manifest, ready marker, and stdout/stderr logs.
+
+The planned runtime sequence is 3+ rounds × 30 minutes, 3+ rounds × 60 minutes, followed later by the 8-hour acceptance run using the same evidence format. GPU behavior and A/V sync remain explicit external runtime observations rather than inferred counters.
+
+Runtime evidence is pending Windows execution using `Gates/G06StabilityStopLatency/README.md`.
 
 ### Result
-TBD
+
+TBD after runtime validation.
 
 ### Architecture consequence
-TBD
+
+Do not freeze the Core Stop timeout from the provisional 30-second value. Use observed Stop P50/P95 plus failure/timeout behavior from G0-6. Long-session acceptance must also satisfy the project memory-growth and finalization requirements before the ScreenRecorderLib route is frozen.
 
 ## G0-7 — Window, monitor, and DPI behavior
 **Status:** NOT RUN
@@ -170,3 +190,5 @@ TBD
 - Does WDA_EXCLUDEFROMCAPTURE remain applied after real transparent/topmost WPF overlays are shown?
 - Which Area/Monitor capture path actually honors display affinity for these overlay HWNDs?
 - Does the Window/WGC route exclude unrelated overlapping windows even in the WDA_NONE control run?
+- What Stop timeout follows from observed G0-6 P50/P95 plus bounded failure margin?
+- Does Private Bytes stabilize after warmup, and what is the measured MiB/hour slope in 30-minute, 60-minute, and 8-hour runs?
