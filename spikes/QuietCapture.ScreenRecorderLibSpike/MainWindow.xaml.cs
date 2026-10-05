@@ -179,7 +179,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void Recorder_OnStatusChanged(object sender, RecordingStatusEventArgs e)
+    private void Recorder_OnStatusChanged(object? sender, RecordingStatusEventArgs e)
     {
         Dispatcher.Invoke(() =>
         {
@@ -188,7 +188,7 @@ public partial class MainWindow : Window
         });
     }
 
-    private void Recorder_OnRecordingComplete(object sender, RecordingCompleteEventArgs e)
+    private void Recorder_OnRecordingComplete(object? sender, RecordingCompleteEventArgs e)
     {
         Dispatcher.Invoke(() =>
         {
@@ -199,7 +199,7 @@ public partial class MainWindow : Window
         });
     }
 
-    private void Recorder_OnRecordingFailed(object sender, RecordingFailedEventArgs e)
+    private void Recorder_OnRecordingFailed(object? sender, RecordingFailedEventArgs e)
     {
         Dispatcher.Invoke(() =>
         {
@@ -211,6 +211,11 @@ public partial class MainWindow : Window
 
     private bool TryReadRectangle(out int x, out int y, out int width, out int height)
     {
+        x = 0;
+        y = 0;
+        width = 0;
+        height = 0;
+
         bool ok =
             int.TryParse(XTextBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out x) &&
             int.TryParse(YTextBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out y) &&
