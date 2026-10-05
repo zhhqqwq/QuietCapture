@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -39,6 +40,18 @@ public partial class G04ControllerWindow : Window
         if (string.IsNullOrWhiteSpace(processPath))
         {
             Log("Environment.ProcessPath is unavailable; cannot launch Worker.");
+            return;
+        }
+
+        bool launchedThroughDotnetHost = string.Equals(
+            Path.GetFileNameWithoutExtension(processPath),
+            "dotnet",
+            StringComparison.OrdinalIgnoreCase);
+        string? entryAssemblyPath = Assembly.GetEntryAssembly()?.Location;
+
+        if (launchedThroughDotnetHost && string.IsNullOrWhiteSpace(entryAssemblyPath))
+        {
+            Log("Current entry assembly path is unavailable; cannot launch Worker through dotnet host.");
             return;
         }
 
@@ -87,6 +100,11 @@ public partial class G04ControllerWindow : Window
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+
+            if (launchedThroughDotnetHost)
+            {
+                startInfo.ArgumentList.Add(entryAssemblyPath!);
+            }
 
             startInfo.ArgumentList.Add("--gate=g0-4-worker");
             startInfo.ArgumentList.Add($"--run-id={runId}");
