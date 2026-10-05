@@ -85,5 +85,4 @@ public sealed class SessionPersistenceService
             SessionStatus.Completed or
             SessionStatus.FailedToStart;
     }
-    }
 }
