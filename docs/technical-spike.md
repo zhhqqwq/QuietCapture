@@ -61,7 +61,7 @@ The G0-3 harness enumerates both loopback output devices and capture/microphone 
 
 ### Evidence
 
-Harness prepared. Each run will write MP4 output, a ScreenRecorderLib debug log, and a `*.g0-3.json` report containing both device IDs, both source IDs, enumeration snapshots, state changes, mixed packet/byte counts, and source-specific packet/byte counts.
+Harness prepared and CI-compilable. Each run will write MP4 output, a ScreenRecorderLib debug log, and a `*.g0-3.json` report containing both device IDs, both source IDs, enumeration snapshots, state changes, mixed packet/byte counts, and source-specific packet/byte counts.
 
 A/V sync is not inferred from callback arrival times. Runtime validation must inspect the resulting media with an audible/visible reference event or media-analysis tooling.
 
@@ -78,16 +78,23 @@ The candidate session model resolves both system-audio and microphone preference
 ## G0-4 — Media and crash recovery
 **Status:** NOT RUN
 
-Compare normal Stop and interrupted-process output, including conventional MP4 versus fragmented MP4 and CFR/VFR behavior where supported.
+The G0-4 harness uses a separate Controller and Recorder Worker process. The Controller selects `IsFragmentedMp4Enabled`, `IsFixedFramerate`, run duration, and Normal Stop versus Kill. The Worker records the main display to `recording.partial.mp4`; Kill runs terminate the Worker from the Controller after the Worker has reached `RecorderStatus.Recording`.
 
 ### Evidence
-TBD
+
+Harness prepared. Every run keeps the raw MP4 untouched and records both `worker-manifest.json` and `controller-manifest.json`, plus the ScreenRecorderLib log and a recording-ready marker. The Controller records Worker PID/exit code, whether it performed the Kill, and post-exit output existence/size.
+
+The planned matrix covers conventional/fragmented MP4 × fixed/non-fixed framerate × Normal Stop/Kill, repeated for static, dynamic, and static→dynamic desktop content.
+
+Runtime media analysis will later record playback, seeking, duration, frame counts, PTS/sample duration, `r_frame_rate`, `avg_frame_rate`, frame-interval regularity, editor import/seek/export, and killed-process survivability.
 
 ### Result
-TBD
+
+TBD after runtime validation.
 
 ### Architecture consequence
-TBD
+
+Do not freeze fragmented-MP4 policy, fixed-framerate policy, remux/finalization requirements, or crash-recovery media behavior until G0-4 runtime evidence is reviewed. Raw interrupted files must remain untouched during initial analysis.
 
 ## G0-5 — Capture exclusion
 **Status:** NOT RUN
@@ -144,3 +151,6 @@ TBD
 - Does a selected microphone remain bound if the Windows default input device changes during an active recording?
 - How does ScreenRecorderLib report microphone removal or privacy/access failure during an active recording?
 - Does the library consistently mix loopback + microphone into one track with acceptable A/V sync?
+- Which fragmented/fixed-framerate combination gives acceptable normal MP4 compatibility?
+- Which configuration leaves the most useful raw media after abrupt process termination?
+- Is a post-normal-stop remux/finalize step required for editor compatibility?

@@ -1,0 +1,86 @@
+<Window x:Class="QuietCapture.ScreenRecorderLibSpike.Gates.G04MediaCrashRecovery.G04ControllerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="QuietCapture G0-4 Media + Crash Recovery"
+        Width="880"
+        Height="680"
+        MinWidth="800"
+        MinHeight="620"
+        WindowStartupLocation="CenterScreen">
+  <Grid Margin="20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0">
+      <TextBlock FontSize="22" FontWeight="SemiBold" Text="G0-4 — Media + Crash Recovery" />
+      <TextBlock Margin="0,6,0,0"
+                 TextWrapping="Wrap"
+                 Text="Controller launches a separate recorder Worker. Normal Stop lets the Worker finish the recording; Kill terminates the Worker after it has entered Recording. Every run keeps its MP4, recorder log, Worker manifest, and Controller manifest." />
+    </StackPanel>
+
+    <Grid Grid.Row="1" Margin="0,18,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="180" />
+        <ColumnDefinition Width="190" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Text="Fragmented MP4" />
+      <ComboBox x:Name="FragmentedComboBox" Grid.Column="1" SelectedIndex="0">
+        <ComboBoxItem Content="false" />
+        <ComboBoxItem Content="true" />
+      </ComboBox>
+      <TextBlock Grid.Column="2" Margin="24,0,0,0" VerticalAlignment="Center" Text="Fixed framerate" />
+      <ComboBox x:Name="FixedFramerateComboBox" Grid.Column="3" SelectedIndex="0">
+        <ComboBoxItem Content="false" />
+        <ComboBoxItem Content="true" />
+      </ComboBox>
+    </Grid>
+
+    <Grid Grid.Row="2" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="180" />
+        <ColumnDefinition Width="190" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Text="Record seconds" />
+      <TextBox x:Name="RunSecondsTextBox" Grid.Column="1" Text="10" />
+      <TextBlock Grid.Column="2" Margin="24,0,0,0" VerticalAlignment="Center" Text="Worker ready timeout" />
+      <TextBlock Grid.Column="3" VerticalAlignment="Center" Text="20 seconds" />
+    </Grid>
+
+    <Grid Grid.Row="3" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="170" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Text="Evidence root" />
+      <TextBox x:Name="EvidenceRootTextBox" Grid.Column="1" IsReadOnly="True" />
+    </Grid>
+
+    <StackPanel Grid.Row="4" Margin="0,18,0,0" Orientation="Horizontal">
+      <Button x:Name="NormalStopButton" Padding="18,8" Content="Run Normal Stop" Click="NormalStopButton_Click" />
+      <Button x:Name="KillButton" Margin="10,0,0,0" Padding="18,8" Content="Run Kill" Click="KillButton_Click" />
+      <TextBlock x:Name="StateTextBlock" Margin="20,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold" Text="Idle" />
+    </StackPanel>
+
+    <TextBlock Grid.Row="5" Margin="0,16,0,8" TextWrapping="Wrap"
+               Text="Matrix target: Fragmented false/true × FixedFramerate false/true × Normal Stop/Kill. Repeat with static, dynamic, and static→dynamic desktop content during real-machine validation." />
+
+    <TextBox x:Name="LogTextBox"
+             Grid.Row="6"
+             IsReadOnly="True"
+             AcceptsReturn="True"
+             VerticalScrollBarVisibility="Auto"
+             HorizontalScrollBarVisibility="Auto"
+             TextWrapping="NoWrap" />
+  </Grid>
+</Window>

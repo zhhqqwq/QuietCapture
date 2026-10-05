@@ -1,27 +1,64 @@
 using System.Windows;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G02SystemAudio;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G03SystemAudioMicrophone;
+using QuietCapture.ScreenRecorderLibSpike.Gates.G04MediaCrashRecovery;
 
 namespace QuietCapture.ScreenRecorderLibSpike;
 
 public partial class App : Application
 {
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        string? gate = e.Args
-            .FirstOrDefault(arg => arg.StartsWith("--gate=", StringComparison.OrdinalIgnoreCase))
-            ?.Split('=', 2)[1];
+        IReadOnlyDictionary<string, string> arguments = ParseArguments(e.Args);
+        arguments.TryGetValue("gate", out string? gate);
+
+        if (string.Equals(gate, "g0-4-worker", StringComparison.OrdinalIgnoreCase))
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            int exitCode = await G04Worker.RunAsync(arguments);
+            Shutdown(exitCode);
+            return;
+        }
 
         Window window = gate?.ToLowerInvariant() switch
         {
             "g0-2" => new G02SystemAudioWindow(),
             "g0-3" => new G03SystemAudioMicrophoneWindow(),
+            "g0-4" => new G04ControllerWindow(),
             _ => new MainWindow()
         };
 
         MainWindow = window;
         window.Show();
+    }
+
+    private static IReadOnlyDictionary<string, string> ParseArguments(
+        IEnumerable<string> args)
+    {
+        var result = new Dictionary<string, string>(
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (string arg in args)
+        {
+            if (!arg.StartsWith("--", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            string value = arg[2..];
+            int separator = value.IndexOf('=');
+
+            if (separator <= 0)
+            {
+                result[value] = "true";
+                continue;
+            }
+
+            result[value[..separator]] = value[(separator + 1)..];
+        }
+
+        return result;
     }
 }
