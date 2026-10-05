@@ -4,6 +4,7 @@ using QuietCapture.ScreenRecorderLibSpike.Gates.G03SystemAudioMicrophone;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G04MediaCrashRecovery;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G05CaptureExclusion;
 using QuietCapture.ScreenRecorderLibSpike.Gates.G06StabilityStopLatency;
+using QuietCapture.ScreenRecorderLibSpike.Gates.G07WindowMonitorDpi;
 
 namespace QuietCapture.ScreenRecorderLibSpike;
 
@@ -39,6 +40,7 @@ public partial class App : Application
             "g0-4" => new G04ControllerWindow(),
             "g0-5" => new G05ControllerWindow(),
             "g0-6" => new G06ControllerWindow(),
+            "g0-7" => new G07ControllerWindow(),
             _ => new MainWindow()
         };
 

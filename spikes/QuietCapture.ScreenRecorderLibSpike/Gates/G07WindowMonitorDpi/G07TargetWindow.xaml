@@ -1,0 +1,63 @@
+<Window x:Class="QuietCapture.ScreenRecorderLibSpike.Gates.G07WindowMonitorDpi.G07TargetWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="QuietCapture G0-7 Window Target"
+        Width="900"
+        Height="560"
+        MinWidth="360"
+        MinHeight="240"
+        WindowStartupLocation="Manual"
+        Background="#FF13263B">
+  <Grid Margin="28">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel>
+      <TextBlock Foreground="White"
+                 FontSize="30"
+                 FontWeight="Bold"
+                 Text="G0-7 WINDOW TARGET" />
+      <TextBlock Margin="0,6,0,0"
+                 Foreground="#FF8EDCFF"
+                 FontSize="16"
+                 Text="Move / Resize / Minimize / Restore / Destroy / Cross-monitor" />
+    </StackPanel>
+
+    <Grid Grid.Row="1" Margin="0,24">
+      <Border BorderBrush="#FF56F39A"
+              BorderThickness="5"
+              CornerRadius="16">
+        <Grid>
+          <Line X1="0" Y1="0" X2="1" Y2="1"
+                Stretch="Fill"
+                Stroke="#FF56F39A"
+                StrokeThickness="3" />
+          <Line X1="1" Y1="0" X2="0" Y2="1"
+                Stretch="Fill"
+                Stroke="#FFFFD166"
+                StrokeThickness="3" />
+          <TextBlock HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Foreground="White"
+                     FontSize="20"
+                     FontWeight="SemiBold"
+                     Text="Geometry reference" />
+        </Grid>
+      </Border>
+    </Grid>
+
+    <StackPanel Grid.Row="2"
+                Orientation="Horizontal">
+      <TextBlock x:Name="ClockTextBlock"
+                 Foreground="#FFFFD166"
+                 FontSize="18" />
+      <TextBlock x:Name="DpiTextBlock"
+                 Margin="24,0,0,0"
+                 Foreground="#FF56F39A"
+                 FontSize="18" />
+    </StackPanel>
+  </Grid>
+</Window>

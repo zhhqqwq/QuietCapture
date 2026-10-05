@@ -160,16 +160,37 @@ Do not freeze the Core Stop timeout from the provisional 30-second value. Use ob
 ## G0-7 — Window, monitor, and DPI behavior
 **Status:** NOT RUN
 
-Validate move, resize, minimize, restore, destroy, multi-monitor coordinates, negative coordinates, and mixed-DPI behavior.
+The G0-7 harness combines three diagnostic routes:
+
+- Window — a deterministic `G07TargetWindow` captured by `WindowRecordingSource(HWND)`, which ScreenRecorderLib 7.0.1 fixes to Windows Graphics Capture;
+- Monitor — selected `DisplayRecordingSource` with explicit `RecorderApi.DesktopDuplication` or `RecorderApi.WindowsGraphicsCapture`;
+- Area — the same selectable display API with source-local physical-pixel `SourceRect`.
 
 ### Evidence
-TBD
+
+Every run captures monitor topology before and after recording. Each display snapshot records HMONITOR, GDI device name, display-device interface identity when available, virtual-screen monitor/work rectangles, primary-monitor status, effective DPI/scaling, and whether the monitor begins at a negative virtual X/Y coordinate.
+
+Window mode supports timed monotonic scripts beginning when the recorder reaches `RecorderStatus.Recording`:
+
+- Lifecycle — Move → Resize → Minimize → Restore → Destroy;
+- CrossMonitor — move the same HWND to another monitor and then back;
+- NoActions — fixed target baseline.
+
+Each scripted action records scheduled/actual time, window HWND validity/minimized state, physical-pixel window rectangle, current monitor device, and `GetDpiForWindow` before/after evidence.
+
+Area runs record both the source-local SourceRect and the expected virtual-desktop rectangle computed as selected-monitor virtual origin + local SourceRect. This isolates coordinate-transform questions on monitors with negative virtual coordinates.
+
+Monitor and Area runs can switch ScreenRecorderLib's display `RecorderApi` between Desktop Duplication and Windows Graphics Capture so Phase 0 can select the production route from evidence.
+
+Runtime evidence is pending Windows execution using `Gates/G07WindowMonitorDpi/README.md`.
 
 ### Result
-TBD
+
+TBD after runtime validation.
 
 ### Architecture consequence
-TBD
+
+Do not freeze Window resize/minimize/destroy/cross-monitor policy, Monitor/Area capture API, Area coordinate transform, or display-topology-change behavior until G0-7 evidence is reviewed. The final Core model remains physical-pixel based and the app manifest remains PerMonitorV2.
 
 ## Architecture decisions produced by Phase 0
 TBD
@@ -192,3 +213,7 @@ TBD
 - Does the Window/WGC route exclude unrelated overlapping windows even in the WDA_NONE control run?
 - What Stop timeout follows from observed G0-6 P50/P95 plus bounded failure margin?
 - Does Private Bytes stabilize after warmup, and what is the measured MiB/hour slope in 30-minute, 60-minute, and 8-hour runs?
+- Does WindowRecordingSource follow the same HWND reliably through move/resize and cross-monitor DPI changes?
+- What raw behavior occurs on minimize and HWND destruction, and should Core safe-stop before/at those transitions?
+- Which display RecorderApi should production retain for Monitor and Area capture?
+- Are Area SourceRect values consistently source-local physical pixels, including on negative-origin monitors?

@@ -12,6 +12,7 @@ It is intentionally isolated from the production projects. Spike code may call t
 - `run-g0-4.ps1` — Controller/Worker media experiment for fragmented MP4, fixed-framerate behavior, Normal Stop, and killed-process output.
 - `run-g0-5.ps1` — real StatusWindow/RecordingBorderWindow capture-exclusion experiment across Area, Monitor, and Window routes.
 - `run-g0-6.ps1` — multi-round Controller/Worker stability sampling and Stop-latency aggregation.
+- `run-g0-7.ps1` — Window lifecycle, display API, virtual-coordinate, multi-monitor, and DPI diagnostics.
 
 A prepared harness does not change a gate result. Runtime-dependent gates remain NOT RUN until reviewed Windows evidence exists.
 
@@ -25,7 +26,7 @@ A prepared harness does not change a gate result. Runtime-dependent gates remain
 | G0-4 | Which MP4/framerate configuration gives acceptable normal and interrupted-process media behavior? | NOT RUN |
 | G0-5 | Are real StatusWindow and RecordingBorderWindow excluded from required Area, Monitor, and Window capture paths? | NOT RUN |
 | G0-6 | Is 30–60 minute recording stable, how do memory/CPU/output metrics evolve, and what are Stop P50/P95? | NOT RUN |
-| G0-7 | What are the verified window, monitor, resize, minimize, and DPI behaviors? | NOT RUN |
+| G0-7 | What are the verified Window lifecycle, Monitor/Area API, virtual-coordinate, and mixed-DPI behaviors? | NOT RUN |
 
 Record reviewed evidence and conclusions in `docs/technical-spike.md`.
 
