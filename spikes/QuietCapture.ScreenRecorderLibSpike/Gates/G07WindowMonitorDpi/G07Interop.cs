@@ -33,7 +33,7 @@ internal static class G07Interop
         var result = new List<G07DisplaySnapshot>();
 
         MonitorEnumProc callback =
-            (hMonitor, _, _, _) =>
+            (nint hMonitor, nint hdcMonitor, ref NativeRect monitorRect, nint data) =>
             {
                 var info = new MonitorInfoEx
                 {
@@ -61,6 +61,9 @@ internal static class G07Interop
                     dpiY = rawDpiY;
                 }
 
+                string deviceName =
+                    info.szDevice ?? string.Empty;
+
                 string? deviceInterfaceId = null;
                 string? deviceString = null;
                 string? deviceKey = null;
@@ -71,7 +74,7 @@ internal static class G07Interop
                 };
 
                 if (EnumDisplayDevicesW(
-                        info.szDevice,
+                        deviceName,
                         0,
                         ref device,
                         EddGetDeviceInterfaceName))
@@ -85,13 +88,13 @@ internal static class G07Interop
                 }
 
                 recorderNames.TryGetValue(
-                    info.szDevice,
+                    deviceName,
                     out string? recorderFriendlyName);
 
                 result.Add(
                     new G07DisplaySnapshot(
                         hMonitor.ToInt64(),
-                        info.szDevice,
+                        deviceName,
                         EmptyToNull(recorderFriendlyName),
                         deviceInterfaceId,
                         deviceString,
