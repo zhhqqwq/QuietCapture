@@ -288,3 +288,48 @@ Missing, inaccessible, or invalid Session working directories remain recovery-vi
 `SessionMetadata.Restore` is an internal Core reconstruction path used only after persisted metadata has already passed validation; it does not introduce a recording-backend contract.
 
 Still deferred: user-selected recovery actions, media remux/repair, damaged MP4 interpretation, backend-specific recovery, and any policy that would automatically delete Interrupted/StopFailed/Orphaned media.
+
+
+## Phase 1 Startup Recovery orchestration foundation
+
+`RecoveryStartupCoordinator` now composes recovery discovery and automatic safe resolution into one startup operation.
+
+Startup input is explicit:
+
+- recovery-index path;
+- known output directories.
+
+Known output roots are normalized, deduplicated case-insensitively, and passed to `RecoveryService`. The resulting candidates are processed in deterministic scan order.
+
+`NoRecoveryRequired` candidates are automatically passed to `RecoveryResolutionService`. Successfully resolved candidates disappear from the startup remainder. Failed automatic resolutions remain in `RemainingCandidates` and their failure is also retained in the startup resolution records.
+
+`Interrupted`, `StopFailed`, and `Orphaned` candidates are preserved and returned in `RemainingCandidates`; startup never auto-deletes their evidence.
+
+`RecoveryStartupResult` separates:
+
+- remaining recovery candidates;
+- per-candidate resolution records;
+- scan diagnostics such as a corrupt recovery index.
+
+`HasOutstandingRecovery` is true when preserved candidates remain or an automatic resolution failed.
+
+### App composition
+
+`QuietCapture.App` now composes the startup recovery graph from:
+
+- `WindowsFileSystem`;
+- `RecoveryIndexStore`;
+- `SessionCleanupPolicy`;
+- `RecoveryResolutionService`;
+- `RecoveryService`;
+- `RecoveryStartupCoordinator`.
+
+The recovery index path follows the frozen internal AppId convention:
+
+`%AppData%/ScreenRecorder/recovery-index.json`.
+
+The Settings/output-directory model is not implemented yet, so current App startup supplies no invented default output root and relies on the recovery index for distributed Session discovery. When Settings is added, its current/known output roots can be passed into the same coordinator without changing Core recovery contracts.
+
+The product UI shell is still deferred; the current bootstrap runs startup recovery composition and then exits.
+
+Still deferred: user-facing recovery UI/actions, Settings-backed output-root history, media repair/remux, and any recording-backend contract.

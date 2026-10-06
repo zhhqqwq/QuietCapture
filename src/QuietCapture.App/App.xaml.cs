@@ -1,15 +1,26 @@
 using System.Windows;
+using QuietCapture.Core.Recovery;
 
 namespace QuietCapture.App;
 
 public partial class App : Application
 {
+    internal RecoveryStartupResult? StartupRecoveryResult
+        { get; private set; }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        // Repository bootstrap only. Product startup is added after Phase 0 freezes
-        // the backend-facing contracts and composition requirements.
+        RecoveryStartupComposition recovery =
+            RecoveryStartupComposition.CreateDefault();
+
+        StartupRecoveryResult =
+            recovery.Run(
+                Array.Empty<string>());
+
+        // The product UI/startup shell is still deferred. Recovery composition
+        // is now active and backend-independent.
         Shutdown();
     }
 }
