@@ -13,6 +13,9 @@ public partial class App : Application
     internal RecoveryStartupResult? StartupRecoveryResult
         { get; private set; }
 
+    internal RecordingStartComposition? RecordingStart
+        { get; private set; }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -39,8 +42,13 @@ public partial class App : Application
                 settings.GetKnownOutputDirectories(
                     startupSettings));
 
-        // The product UI/startup shell is still deferred. Settings and
-        // recovery startup composition are now active and backend-independent.
+        RecordingStart =
+            RecordingStartComposition.CreateDefault(
+                fileSystem,
+                recovery.RecoveryIndexPath);
+
+        // The product UI/startup shell is still deferred. Settings, recovery,
+        // and recording-start preparation composition are now active.
         Shutdown();
     }
 }

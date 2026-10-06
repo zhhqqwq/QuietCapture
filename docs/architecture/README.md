@@ -451,3 +451,50 @@ The resolver performs discovery only. It does not open an audio stream, request 
 Windows integration tests intentionally permit CI hosts with zero audio endpoints. They verify real Core Audio enumeration/resolver consistency and, when defaults exist, require Start Preflight to emit those exact concrete endpoint IDs.
 
 Still deferred: audio-device hotplug notifications, Settings UI enumeration, microphone permission UX, backend device binding, loopback/capture stream creation, and disconnect-during-recording handling.
+
+
+## Phase 1 Recording Start Preparation foundation
+
+`RecordingStartPreparationService` now composes the backend-independent Start preparation path from Settings intent through durable Session creation.
+
+The preparation flow is:
+
+1. receive `AppSettings + CaptureTarget + PixelSize`;
+2. build a fresh `RecordingIntent`;
+3. run `RecordingPreflightService`;
+4. if preflight succeeds, pass its resolved target/options/output directory to `SessionManager.CreateSession`;
+5. return a durable `SessionMetadata` in `Created`.
+
+The boundary intentionally stops at `Created`. It does not transition to `Starting`, create a recorder backend, or open capture/audio streams.
+
+### Failure semantics
+
+`RecordingStartFailure.Preflight` means no Session creation was attempted. In this path, no final-path reservation, working directory, `session.json`, or recovery-index entry is created.
+
+`RecordingStartFailure.SessionCreation` means preflight succeeded but the existing Session reservation/persistence path failed. The underlying `SessionManager` cleanup/preservation rules remain authoritative.
+
+`RecordingStartPreparationResult` preserves the concrete `RecordingPreflightFailure` for preflight failures so future UI can distinguish missing output, FAT32, unwritable volume, missing default endpoints, or stale specific endpoint IDs.
+
+### Fresh device resolution
+
+Every `Prepare` call builds a new intent and executes preflight again. Default audio endpoint IDs are therefore resolved at each Start preparation and are never cached in Settings or the preparation service.
+
+A successful Session persists the concrete resolved endpoint IDs in versioned `session.json` through the existing `RecordingOptionsDocument`.
+
+### App composition
+
+`RecordingStartComposition` composes:
+
+- `WindowsFileSystem`;
+- `WindowsAudioDeviceResolver`;
+- `RecordingPreflightService`;
+- `OutputPlanner`;
+- `SessionStore`;
+- `RecoveryIndexStore`;
+- `SessionPersistenceService`;
+- `SessionManager`;
+- `RecordingStartPreparationService`.
+
+App startup constructs this composition after startup recovery using the same recovery-index path. The current UI shell still exits immediately, so no recording backend is started.
+
+Still deferred: `Starting` orchestration, recorder-backend creation, backend Start/Stop contracts, CFR/VFR policy, fragmented-MP4 configuration, remux policy, and Phase 0-dependent media behavior.
