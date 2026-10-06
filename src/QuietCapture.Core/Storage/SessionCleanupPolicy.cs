@@ -92,6 +92,13 @@ public sealed class SessionCleanupPolicy
             SessionStore.GetMetadataPath(
                 session.WorkingDirectory);
 
+        if (!CanRemoveMetadataAndDirectory(
+                session.WorkingDirectory,
+                metadataPath))
+        {
+            return false;
+        }
+
         _fileSystem.DeleteFile(
             metadataPath);
 
@@ -99,5 +106,44 @@ public sealed class SessionCleanupPolicy
             session.WorkingDirectory);
 
         return true;
+    }
+
+    private bool CanRemoveMetadataAndDirectory(
+        string workingDirectory,
+        string metadataPath)
+    {
+        try
+        {
+            if (_fileSystem
+                    .EnumerateDirectories(
+                        workingDirectory)
+                    .Count != 0)
+            {
+                return false;
+            }
+
+            IReadOnlyList<string> files =
+                _fileSystem.EnumerateFiles(
+                    workingDirectory);
+
+            return files.All(file =>
+                PathsEqual(
+                    file,
+                    metadataPath));
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return true;
+        }
+    }
+
+    private static bool PathsEqual(
+        string first,
+        string second)
+    {
+        return string.Equals(
+            Path.GetFullPath(first),
+            Path.GetFullPath(second),
+            StringComparison.OrdinalIgnoreCase);
     }
 }

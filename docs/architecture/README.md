@@ -232,3 +232,36 @@ The intended successful finalization order is therefore:
 If recovery-index removal fails after `Completed` is durable, cleanup refuses to run until the stale index entry is resolved.
 
 Still deferred: backend-specific finalization/remux before publication, cleanup scheduling/orchestration, and release-time media compatibility policy.
+
+
+## Phase 1 Finalization Orchestration foundation
+
+`SessionFinalizationService` now coordinates the already-frozen backend-independent finalization pieces without defining any recording-backend contract.
+
+The successful path is:
+
+1. require the Session to be `Finalizing`;
+2. publish non-empty partial media into the reserved final path;
+3. atomically persist `Completed`;
+4. remove the recovery-index entry;
+5. run safe Session cleanup.
+
+A repeated finalization request for an already `Completed` Session is idempotent: it does not republish media and only retries safe cleanup.
+
+### Failure boundaries
+
+If media publication fails, the partial file remains in the Session working directory and the service attempts to persist `StopFailed`. If even that metadata transition fails, the in-memory Session remains `Finalizing`, the previous durable metadata remains intact, and the partial file is still preserved.
+
+After media publication has succeeded, later failures preserve the published final media rather than moving it back into the working directory:
+
+- a `Completed` metadata-write failure leaves the in-memory Session in `Finalizing`, keeps the recovery-index entry, and leaves the published final media intact;
+- a recovery-index removal failure leaves durable/in-memory `Completed`, the stale index entry, and the final media intact;
+- a cleanup failure leaves `Completed` and the final media intact, with remaining Session evidence available for a later cleanup retry.
+
+No rollback move from final media back to partial media is attempted.
+
+### Cleanup safety
+
+Before deleting `session.json`, `SessionCleanupPolicy` now verifies that the Session working directory has no child directories and no files other than that metadata file. Unexpected logs or other evidence therefore block cleanup while keeping `session.json` intact.
+
+Still deferred: backend-specific flush/finalize/remux behavior, Stop timeout policy, automatic cleanup scheduling, and the production recording-backend contract.

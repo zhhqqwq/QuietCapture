@@ -23,6 +23,8 @@ internal sealed class FakeFileSystem : IFileSystem
 
     public Func<string, string, Exception?>? MoveFileFailureFactory { get; set; }
 
+    public Func<string, Exception?>? DeleteFileFailureFactory { get; set; }
+
     public IReadOnlyCollection<string> FilePaths =>
         _files.Keys.ToArray();
 
@@ -167,8 +169,20 @@ internal sealed class FakeFileSystem : IFileSystem
 
     public void DeleteFile(string path)
     {
+        string normalized =
+            Normalize(path);
+
+        Exception? failure =
+            DeleteFileFailureFactory?.Invoke(
+                normalized);
+
+        if (failure is not null)
+        {
+            throw failure;
+        }
+
         _files.TryRemove(
-            Normalize(path),
+            normalized,
             out _);
     }
 
