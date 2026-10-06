@@ -379,3 +379,46 @@ This upgrades startup recovery from index-only discovery to:
 `recovery-index + current output root + output-directory history`.
 
 Still deferred: Settings UI, output-directory picker, resolution-policy settings, hotkeys, disk thresholds, concrete default-device resolution, and every backend/container-specific setting that depends on Phase 0 evidence.
+
+
+## Phase 1 Start Preflight + Recording Intent Resolution
+
+Start preflight now separates Settings user intent from the resolved parameters that can be persisted into a Session.
+
+`RecordingIntent` carries only backend-independent Start input:
+
+- capture target;
+- fixed output pixel size already chosen by the UI/Core geometry flow;
+- selected output directory;
+- target frame rate;
+- quality-preset ID;
+- system-audio and microphone enable intent;
+- audio-device preferences.
+
+`RecordingIntent.FromSettings` copies Settings intent without resolving default devices and without introducing any encoder/container flags.
+
+`RecordingPreflightService` resolves the intent before Session creation in this order:
+
+1. require an output directory;
+2. resolve the target volume;
+3. reject a non-writable volume;
+4. reject FAT32;
+5. resolve enabled system audio;
+6. resolve enabled microphone;
+7. create a fully resolved `RecordingOptions`.
+
+Disabled audio sources do not call `IAudioDeviceResolver` and persist no device ID.
+
+For an enabled source with `AudioDevicePreference.Default`, preflight asks `IAudioDeviceResolver` for the current concrete default device ID at Start time. For `Specific`, preflight verifies that the preferred ID is currently available. The resulting `RecordingOptions` therefore contains concrete IDs for every enabled audio source.
+
+`IAudioDeviceResolver` is a Core platform port only. No Windows/NAudio implementation is frozen in this phase; that implementation can be added after the device-enumeration path is chosen without changing the preflight contract.
+
+The output-volume checks intentionally overlap with `OutputPlanner`. Preflight gives an early user-facing failure, while OutputPlanner remains the authoritative reservation-time guard against unwritable/FAT32 output.
+
+Target frame rate remains a user target carried into `RecordingOptions.FrameRate`. Preflight contains no CFR/fixed-framerate setting, fragmented-MP4 option, backend route, remux decision, or ScreenRecorderLib type.
+
+A successful `RecordingPreflightResult` exposes exactly the inputs needed by the existing backend-independent Session creation boundary:
+
+`SessionManager.CreateSession(target, options, outputDirectory, createdAt)`.
+
+Still deferred: the Windows audio-device resolver implementation, microphone access probing, disk free-space threshold policy, Settings/UI error presentation, recording backend creation, fixed-framerate policy, and media-container decisions.
