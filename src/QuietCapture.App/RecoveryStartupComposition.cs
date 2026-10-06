@@ -1,8 +1,8 @@
 using System.IO;
+using QuietCapture.Core.Ports;
 using QuietCapture.Core.Recovery;
 using QuietCapture.Core.Sessions;
 using QuietCapture.Core.Storage;
-using QuietCapture.Infrastructure.Windows.Storage;
 
 namespace QuietCapture.App;
 
@@ -26,10 +26,10 @@ internal sealed class RecoveryStartupComposition
 
     public string RecoveryIndexPath { get; }
 
-    public static RecoveryStartupComposition CreateDefault()
+    public static RecoveryStartupComposition CreateDefault(
+        IFileSystem fileSystem)
     {
-        var fileSystem =
-            new WindowsFileSystem();
+        ArgumentNullException.ThrowIfNull(fileSystem);
 
         string appData =
             Environment.GetFolderPath(

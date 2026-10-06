@@ -333,3 +333,49 @@ The Settings/output-directory model is not implemented yet, so current App start
 The product UI shell is still deferred; the current bootstrap runs startup recovery composition and then exits.
 
 Still deferred: user-facing recovery UI/actions, Settings-backed output-root history, media repair/remux, and any recording-backend contract.
+
+
+## Phase 1 Settings foundation
+
+Settings now model user intent separately from resolved per-Session recording parameters.
+
+`AppSettings` currently contains only backend-independent preferences:
+
+- current output directory plus normalized output-directory history;
+- target frame rate;
+- quality-preset ID;
+- default system-audio and microphone enable switches;
+- system-audio and microphone device preferences.
+
+The first-run defaults are intentionally minimal: no output directory is invented, target frame rate is 30, quality preset is `balanced`, both audio sources are disabled by default, and both device preferences follow the system default device.
+
+`AudioDevicePreference.Default` contains no concrete device ID. A specific preference may retain a preferred device ID, but resolving “default device” into the concrete render/capture ID remains a future Start-preflight responsibility. Settings therefore never substitute for resolved `RecordingOptions`.
+
+`OutputDirectoryHistory` normalizes and case-insensitively deduplicates paths while preserving the current directory first. Volume-root paths keep their root separator instead of being reduced from forms such as `C:\` to `C:`.
+
+`SettingsService` provides first-run/corrupt-settings fallback, output-directory updates, and the known output roots consumed by startup recovery.
+
+### Windows persistence
+
+`JsonSettingsStore` persists a versioned primitive JSON document at:
+
+`%AppData%/ScreenRecorder/settings.json`.
+
+Writes use the existing `IFileSystem.WriteAllTextAtomically` contract. Corrupt or unsupported settings documents are treated as recoverable reads by `SettingsService`, which returns first-run defaults without rewriting the damaged file during load.
+
+The persisted Settings schema intentionally contains no recording-backend route, ScreenRecorderLib type, fixed-framerate/CFR flag, fragmented-MP4 flag, or remux/container decision.
+
+### App composition
+
+App startup now:
+
+1. constructs one `WindowsFileSystem`;
+2. loads Settings through `SettingsStartupComposition`;
+3. supplies Settings current/history output roots to `RecoveryStartupComposition`;
+4. runs startup recovery.
+
+This upgrades startup recovery from index-only discovery to:
+
+`recovery-index + current output root + output-directory history`.
+
+Still deferred: Settings UI, output-directory picker, resolution-policy settings, hotkeys, disk thresholds, concrete default-device resolution, and every backend/container-specific setting that depends on Phase 0 evidence.

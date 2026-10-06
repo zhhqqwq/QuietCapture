@@ -120,9 +120,20 @@ public sealed class RecoveryStartupCoordinator
                 continue;
             }
 
+            string fullPath =
+                Path.GetFullPath(directory);
+
+            string? root =
+                Path.GetPathRoot(fullPath);
+
             string normalized =
-                Path.GetFullPath(directory)
-                    .TrimEnd(
+                !string.IsNullOrWhiteSpace(root) &&
+                string.Equals(
+                    fullPath,
+                    root,
+                    StringComparison.OrdinalIgnoreCase)
+                    ? fullPath
+                    : fullPath.TrimEnd(
                         Path.DirectorySeparatorChar,
                         Path.AltDirectorySeparatorChar);
 
