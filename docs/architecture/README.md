@@ -422,3 +422,32 @@ A successful `RecordingPreflightResult` exposes exactly the inputs needed by the
 `SessionManager.CreateSession(target, options, outputDirectory, createdAt)`.
 
 Still deferred: the Windows audio-device resolver implementation, microphone access probing, disk free-space threshold policy, Settings/UI error presentation, recording backend creation, fixed-framerate policy, and media-container decisions.
+
+
+## Phase 1 Windows Audio Device Resolution
+
+`QuietCapture.Infrastructure.Windows.Audio` now implements the Core `IAudioDeviceResolver` contract directly on Windows Core Audio endpoint APIs.
+
+`AudioEndpointEnumerator` uses the Windows MMDevice endpoint enumerator to:
+
+- enumerate active render endpoints;
+- enumerate active capture endpoints;
+- resolve the current default Multimedia-role render endpoint;
+- resolve the current default Multimedia-role capture endpoint;
+- read the stable endpoint ID, endpoint state, and friendly name when available.
+
+`AudioEndpointSnapshot` is an Infrastructure.Windows model containing endpoint identity/state only. It does not expose NAudio, ScreenRecorderLib, WASAPI capture, or backend-specific objects.
+
+`WindowsAudioDeviceResolver` maps endpoint discovery into the backend-independent Core port:
+
+- default system audio → current default active render endpoint ID;
+- default microphone → current default active capture endpoint ID;
+- specific render/capture availability → membership in the current active endpoint set for that flow.
+
+If Windows has no active/default endpoint for a requested flow, default resolution returns null and existing Start Preflight produces the corresponding unavailable-device failure.
+
+The resolver performs discovery only. It does not open an audio stream, request microphone access, choose loopback/capture implementations, or prove that a recorder backend can consume the ID. Those runtime properties remain Phase 0 G0-2/G0-3 evidence.
+
+Windows integration tests intentionally permit CI hosts with zero audio endpoints. They verify real Core Audio enumeration/resolver consistency and, when defaults exist, require Start Preflight to emit those exact concrete endpoint IDs.
+
+Still deferred: audio-device hotplug notifications, Settings UI enumeration, microphone permission UX, backend device binding, loopback/capture stream creation, and disconnect-during-recording handling.
