@@ -25,6 +25,10 @@ internal sealed class FakeFileSystem : IFileSystem
 
     public Func<string, Exception?>? DeleteFileFailureFactory { get; set; }
 
+    public Func<string, Exception?>? EnumerateDirectoriesFailureFactory { get; set; }
+
+    public Func<string, Exception?>? EnumerateFilesFailureFactory { get; set; }
+
     public IReadOnlyCollection<string> FilePaths =>
         _files.Keys.ToArray();
 
@@ -102,6 +106,15 @@ internal sealed class FakeFileSystem : IFileSystem
         string normalized =
             Normalize(path);
 
+        Exception? failure =
+            EnumerateDirectoriesFailureFactory?.Invoke(
+                normalized);
+
+        if (failure is not null)
+        {
+            throw failure;
+        }
+
         return _directories.Keys
             .Where(directory =>
                 IsDirectChild(
@@ -118,6 +131,15 @@ internal sealed class FakeFileSystem : IFileSystem
     {
         string normalized =
             Normalize(path);
+
+        Exception? failure =
+            EnumerateFilesFailureFactory?.Invoke(
+                normalized);
+
+        if (failure is not null)
+        {
+            throw failure;
+        }
 
         return _files.Keys
             .Where(file =>

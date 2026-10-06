@@ -80,6 +80,82 @@ public sealed class SessionMetadata
             createdAt);
     }
 
+    internal static SessionMetadata Restore(
+        SessionMetadataDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        if (!Guid.TryParse(
+                document.SessionId,
+                out Guid sessionGuid) ||
+            sessionGuid == Guid.Empty)
+        {
+            throw new InvalidOperationException(
+                "Persisted Session ID is invalid.");
+        }
+
+        if (!Enum.TryParse(
+                document.Status,
+                ignoreCase: false,
+                out SessionStatus status) ||
+            !Enum.IsDefined(status))
+        {
+            throw new InvalidOperationException(
+                "Persisted Session status is invalid.");
+        }
+
+        StopReason? stopReason = null;
+
+        if (document.StopReason is not null)
+        {
+            if (!Enum.TryParse(
+                    document.StopReason,
+                    ignoreCase: false,
+                    out StopReason parsedStopReason) ||
+                !Enum.IsDefined(parsedStopReason))
+            {
+                throw new InvalidOperationException(
+                    "Persisted StopReason is invalid.");
+            }
+
+            stopReason = parsedStopReason;
+        }
+
+        CaptureTarget target =
+            RestoreTarget(document.Target);
+
+        RecordingOptions options =
+            new(
+                new PixelSize(
+                    document.Options.OutputWidth,
+                    document.Options.OutputHeight),
+                document.Options.FrameRate,
+                new VideoQualityPreset(
+                    document.Options.QualityPresetId),
+                document.Options.RecordSystemAudio,
+                document.Options.RecordMicrophone,
+                document.Options.SystemAudioDeviceId,
+                document.Options.MicrophoneDeviceId);
+
+        var session =
+            new SessionMetadata(
+                new SessionId(sessionGuid),
+                target,
+                options,
+                document.WorkingDirectory,
+                document.TempMediaPath,
+                document.FinalMediaPath,
+                document.CreatedAt)
+            {
+                StartedAt = document.StartedAt,
+                FinishedAt = document.FinishedAt,
+                Status = status,
+                StopReason = stopReason
+            };
+
+        return session;
+    }
+
     internal void TransitionTo(
         SessionStatus nextStatus,
         DateTimeOffset occurredAt,
@@ -106,6 +182,51 @@ public sealed class SessionMetadata
         {
             FinishedAt = occurredAt;
         }
+    }
+
+    private static CaptureTarget RestoreTarget(
+        CaptureTargetDocument target)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+
+        return target.Kind switch
+        {
+            "Area" =>
+                new AreaCaptureTarget(
+                    target.MonitorId ??
+                        throw new InvalidOperationException(
+                            "Persisted Area target monitor ID is missing."),
+                    new PixelRect(
+                        target.X ??
+                            throw new InvalidOperationException(
+                                "Persisted Area target X is missing."),
+                        target.Y ??
+                            throw new InvalidOperationException(
+                                "Persisted Area target Y is missing."),
+                        target.Width ??
+                            throw new InvalidOperationException(
+                                "Persisted Area target Width is missing."),
+                        target.Height ??
+                            throw new InvalidOperationException(
+                                "Persisted Area target Height is missing."))),
+
+            "Window" =>
+                new WindowCaptureTarget(
+                    new IntPtr(
+                        target.Hwnd ??
+                            throw new InvalidOperationException(
+                                "Persisted Window target HWND is missing."))),
+
+            "Monitor" =>
+                new MonitorCaptureTarget(
+                    target.MonitorId ??
+                        throw new InvalidOperationException(
+                            "Persisted Monitor target ID is missing.")),
+
+            _ =>
+                throw new InvalidOperationException(
+                    $"Unsupported persisted capture target kind: {target.Kind}.")
+        };
     }
 
     private static string RequirePath(

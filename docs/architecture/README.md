@@ -265,3 +265,26 @@ No rollback move from final media back to partial media is attempted.
 Before deleting `session.json`, `SessionCleanupPolicy` now verifies that the Session working directory has no child directories and no files other than that metadata file. Unexpected logs or other evidence therefore block cleanup while keeping `session.json` intact.
 
 Still deferred: backend-specific flush/finalize/remux behavior, Stop timeout policy, automatic cleanup scheduling, and the production recording-backend contract.
+
+
+## Phase 1 Recovery Resolution foundation
+
+`RecoveryResolutionService` now handles recovery candidates after discovery/classification without introducing any media repair or recording-backend dependency.
+
+Automatic resolution is intentionally limited to `NoRecoveryRequired` candidates. `Interrupted`, `StopFailed`, and `Orphaned` candidates always return a preserve action and do not delete files or remove recovery-index entries.
+
+For `NoRecoveryRequired` candidates, the order is:
+
+1. reconstruct the validated Session domain state from the persisted `session.json` document;
+2. remove a stale recovery-index entry when present;
+3. run `SessionCleanupPolicy` for the safe terminal Session.
+
+Index removal is attempted before cleanup. If the index write fails, cleanup does not start. If cleanup later fails, remaining `session.json` or other working-directory evidence is left available for direct directory scanning.
+
+Repeated resolution is idempotent. Re-resolving a previously cleaned candidate does not republish media, recreate index entries, or delete the published final media.
+
+Missing, inaccessible, or invalid Session working directories remain recovery-visible as `Orphaned` candidates and are preserved automatically.
+
+`SessionMetadata.Restore` is an internal Core reconstruction path used only after persisted metadata has already passed validation; it does not introduce a recording-backend contract.
+
+Still deferred: user-selected recovery actions, media remux/repair, damaged MP4 interpretation, backend-specific recovery, and any policy that would automatically delete Interrupted/StopFailed/Orphaned media.
