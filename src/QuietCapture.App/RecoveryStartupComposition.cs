@@ -1,3 +1,4 @@
+using System.IO;
 using QuietCapture.Core.Recovery;
 using QuietCapture.Core.Sessions;
 using QuietCapture.Core.Storage;
